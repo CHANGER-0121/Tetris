@@ -1,0 +1,49 @@
+body {
+  background-color: #222;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  margin-top: 20px;
+}
+
+#joinDiv {
+  margin: 20px;
+}
+
+#tetris {
+  background-color: black;
+  border: 2px solid #fff;
+  display: block;
+  margin: 10px auto;
+}
+
+#scoreBoard {
+  margin-top: 10px;
+  font-size: 1.2em;
+}
+
+#message {
+  margin-top: 20px;
+  font-size: 1.2em;
+  color: #ff4444;
+}
+
+#otherPlayers {
+  margin: 20px auto;
+  max-width: 600px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.playerPanel {
+  background-color: #333;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #fff;
+}
