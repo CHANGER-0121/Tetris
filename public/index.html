@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Multiplayer Tetris</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Multiplayer Tetris (Local)</h1>
+  
+  <!-- Join Room UI -->
+  <div id="joinDiv">
+    <input type="text" id="roomId" placeholder="Enter room name" />
+    <button id="joinBtn">Join Room</button>
+  </div>
+  
+  <!-- Actual Tetris Game + Info -->
+  <div id="gameArea" style="display:none;">
+    <canvas id="tetris" width="300" height="600"></canvas>
+    <div id="scoreBoard">Score: <span id="score">0</span></div>
+    <div id="message"></div>
+    
+    <h2>Other Players</h2>
+    <div id="otherPlayers"></div>
+  </div>
+
+  <!-- Socket.IO script from our server -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Your client script -->
+  <script src="client.js"></script>
+</body>
+</html>
