@@ -2,7 +2,7 @@
 // Socket.IO Setup
 /////////////////////////////
 
-const socket = io();
+const socket = io("https://tetris-l8kg.onrender.com"); // ✅ Updated for deployed backend
 
 let currentRoomId = null;
 
