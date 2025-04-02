@@ -2,7 +2,8 @@
 // Socket.IO Setup
 /////////////////////////////
 
-const socket = io("https://tetris-l8kg.onrender.com"); // ✅ Updated for deployed backend
+// Connect to deployed backend on Render
+const socket = io("https://tetris-l8kg.onrender.com");
 
 let currentRoomId = null;
 
@@ -17,7 +18,7 @@ document.getElementById('joinBtn').addEventListener('click', () => {
   }
 });
 
-// Listen for detailed room updates
+// Listen for detailed room updates from the server
 socket.on('roomData', (players) => {
   renderOtherPlayers(players);
 });
@@ -27,7 +28,7 @@ function renderOtherPlayers(players) {
   container.innerHTML = '';
 
   Object.entries(players).forEach(([id, pState]) => {
-    if (id === socket.id) return;
+    if (id === socket.id) return; // Skip rendering yourself
 
     const div = document.createElement('div');
     div.className = 'playerPanel';
@@ -46,7 +47,7 @@ function renderOtherPlayers(players) {
   });
 }
 
-// Send complete state to server
+// Send complete state to the server periodically
 function sendStateToServer() {
   if (currentRoomId && !isGameOver) {
     socket.emit('stateUpdate', {
@@ -80,8 +81,8 @@ function drawOpponentBoard(canvasId, boardGrid, piece, pieceRow, pieceCol) {
 
   if (piece) {
     piece.coords.forEach(([x, y]) => {
-      let r = pieceRow + y;
-      let c = pieceCol + x;
+      const r = pieceRow + y;
+      const c = pieceCol + x;
       if (r >= 0) drawOpponentSquare(ctx, r, c, piece.color);
     });
   }
@@ -94,8 +95,7 @@ function drawOpponentSquare(ctx, row, col, color) {
 }
 
 /////////////////////////////
-// Existing Tetris Game Logic (Unchanged)
-// (Keep existing Tetris logic intact)
+// Game Logic Setup
 /////////////////////////////
 
 const COLS = 10, ROWS = 20, CELL_SIZE = 30, DROP_INTERVAL = 500;
@@ -107,13 +107,13 @@ const messageElem = document.getElementById('message');
 let grid = [], currentPiece, currentRow, currentCol, score = 0;
 let isGameOver = false, isPaused = false, lastTime = 0, dropCounter = 0;
 
-// ... Existing Tetris logic functions remain unchanged: 
-// createGrid, getRandomTetromino, spawnNewPiece, isValidPosition, 
-// lockPiece, clearLines, rotatePiece, draw, drawSquare, update, 
-// event listeners, and initGame.
+// Game logic functions assumed to be defined elsewhere:
+// createGrid, getRandomTetromino, spawnNewPiece, isValidPosition,
+// lockPiece, clearLines, rotatePiece, draw, drawSquare,
+// update, event listeners, and initGame
 
 /////////////////////////////
-// Modified Game Loop
+// Game Loop with Sync
 /////////////////////////////
 
 function update(time = 0) {
@@ -141,6 +141,6 @@ function update(time = 0) {
   }
 
   draw();
-  sendStateToServer(); // sends full state to server (grid & current piece)
+  sendStateToServer();
   requestAnimationFrame(update);
 }
