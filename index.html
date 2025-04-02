@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <title>Multiplayer Tetris</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- ✅ Socket.IO client from CDN -->
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 </head>
 <body>
   <h1>Multiplayer Tetris (Local)</h1>
@@ -24,9 +27,7 @@
     <div id="otherPlayers"></div>
   </div>
 
-  <!-- Socket.IO script from our server -->
-  <script src="/socket.io/socket.io.js"></script>
-  <!-- Your client script -->
+  <!-- ✅ Your client script -->
   <script src="client.js"></script>
 </body>
 </html>
