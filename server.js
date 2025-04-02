@@ -6,29 +6,34 @@ const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
+
+// ✅ Configure CORS to allow GitHub Pages
 const io = new Server(server, {
   cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
+    origin: "https://changer-0121.github.io", // ✅ Allow only your GitHub Pages domain
+    methods: ["GET", "POST"]
   }
 });
 
-// Optional: Serve static files (if hosting frontend together)
+// ✅ If you ever serve static frontend files, use this
 app.use(express.static('public'));
 
-// Store rooms and player states
+// ✅ Optionally respond to GET /
+app.get('/', (req, res) => {
+  res.send('Tetris multiplayer server is running.');
+});
+
+// Room and player state storage
 const rooms = {};
 
 io.on('connection', (socket) => {
   console.log('🟢 Client connected:', socket.id);
 
-  // Handle joining a room
   socket.on('joinRoom', (roomId) => {
     if (!rooms[roomId]) {
       rooms[roomId] = { players: {} };
     }
 
-    // Add player to room
     rooms[roomId].players[socket.id] = {
       score: 0,
       grid: null,
@@ -40,21 +45,16 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     console.log(`🔗 ${socket.id} joined room ${roomId}`);
 
-    // Send updated room data
     io.to(roomId).emit('roomData', rooms[roomId].players);
   });
 
-  // Handle state updates from clients
   socket.on('stateUpdate', ({ roomId, state }) => {
     if (rooms[roomId]?.players[socket.id]) {
       rooms[roomId].players[socket.id] = state;
-
-      // Broadcast updated room state to all clients in the room
       io.to(roomId).emit('roomData', rooms[roomId].players);
     }
   });
 
-  // Handle disconnection
   socket.on('disconnect', () => {
     console.log('🔴 Client disconnected:', socket.id);
 
@@ -63,7 +63,6 @@ io.on('connection', (socket) => {
         delete room.players[socket.id];
         console.log(`❌ Removed ${socket.id} from room ${roomId}`);
 
-        // If room is empty, delete it
         if (Object.keys(room.players).length === 0) {
           delete rooms[roomId];
           console.log(`🗑️ Deleted empty room: ${roomId}`);
@@ -75,9 +74,9 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start server — PORT set automatically by Render
+// ✅ Start the server (Render will inject PORT env var)
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
