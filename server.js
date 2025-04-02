@@ -13,7 +13,7 @@ const io = new Server(server, {
   }
 });
 
-// Optional: Serve static files if hosting frontend together
+// Optional: Serve static files (if hosting frontend together)
 app.use(express.static('public'));
 
 // Store rooms and player states
@@ -75,8 +75,9 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start server
+// Start server — PORT set automatically by Render
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
+
