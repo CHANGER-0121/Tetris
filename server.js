@@ -3,24 +3,31 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const cors = require('cors'); // ✅ Make sure cors is installed
 
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Configure CORS to allow GitHub Pages
-const io = new Server(server, {
-  cors: {
-    origin: "https://changer-0121.github.io", // ✅ Allow only your GitHub Pages domain
-    methods: ["GET", "POST"]
-  }
-});
+// ✅ Add CORS middleware for all routes (not just Socket.IO)
+app.use(cors({
+  origin: "https://changer-0121.github.io",
+  methods: ["GET", "POST"]
+}));
 
-// ✅ If you ever serve static frontend files, use this
+// ✅ Serve static files (optional, in case you want a test HTML)
 app.use(express.static('public'));
 
-// ✅ Optionally respond to GET /
+// ✅ Simple route for test
 app.get('/', (req, res) => {
   res.send('Tetris multiplayer server is running.');
+});
+
+// ✅ Socket.IO with CORS setup
+const io = new Server(server, {
+  cors: {
+    origin: "https://changer-0121.github.io",
+    methods: ["GET", "POST"]
+  }
 });
 
 // Room and player state storage
@@ -74,9 +81,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// ✅ Start the server (Render will inject PORT env var)
+// ✅ Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
