@@ -1,34 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multiplayer Tetris</title>
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- ✅ Load Socket.IO -->
-  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-
-  <!-- ✅ Load your core game logic (must define initGame) -->
-  <script src="game.js"></script> <!-- or whatever JS file has initGame -->
-
-  <!-- ✅ Then load multiplayer logic -->
-  <script src="client.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="/socket.io/socket.io.js"></script>
+  <script defer src="game.js"></script>
+  <script defer src="client.js"></script>
 </head>
 <body>
-  <h1>Multiplayer Tetris</h1>
-
-  <!-- Join Room UI -->
   <div id="joinDiv">
-    <input type="text" id="roomId" placeholder="Enter room name" />
+    <h2>Join a Room</h2>
+    <input type="text" id="roomId" placeholder="Enter Room ID">
     <button id="joinBtn">Join Room</button>
   </div>
 
-  <!-- Tetris game canvas and multiplayer UI -->
-  <div id="gameArea" style="display:none;">
+  <div id="lobbyDiv" style="display: none;">
+    <h2>Lobby</h2>
+    <p id="roomLabel"></p>
+    <button id="startBtn" disabled>Waiting for Player...</button>
+  </div>
+
+  <div id="gameArea" style="display: none;">
+    <h2>Multiplayer Tetris</h2>
+    <p id="score">Score: 0</p>
     <canvas id="tetris" width="300" height="600"></canvas>
-    <div id="scoreBoard">Score: <span id="score">0</span></div>
-    <div id="message"></div>
-    <h2>Other Players</h2>
+    <p id="message"></p>
     <div id="otherPlayers"></div>
   </div>
 </body>
