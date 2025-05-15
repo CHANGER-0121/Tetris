@@ -8,44 +8,24 @@
   <script src="/socket.io/socket.io.js"></script>
   <script defer src="game.js"></script>
   <script defer src="client.js"></script>
-  <style>
-    canvas {
-      border: 2px solid #333;
-      background-color: #f7f7f7;
-    }
-    .playerPanel {
-      text-align: center;
-    }
-    input, button {
-      padding: 0.5rem;
-      font-size: 1rem;
-      margin: 0.5rem;
-    }
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-      background-color: #f0f0f0;
-    }
-  </style>
 </head>
 <body>
-  <!-- Join Room Section -->
-  <div id="joinDiv" style="text-align: center; padding: 2rem;">
+  <!-- Join Room Section (Visible by default) -->
+  <div id="joinDiv" class="active">
     <h2>Join a Room</h2>
     <input type="text" id="roomId" placeholder="Enter Room ID" />
     <button id="joinBtn">Join Room</button>
   </div>
 
-  <!-- Lobby Section -->
-  <div id="lobbyDiv" style="display: none; text-align: center; padding: 2rem;">
+  <!-- Lobby Section (Hidden initially) -->
+  <div id="lobbyDiv">
     <h2>Lobby</h2>
     <p id="roomLabel"></p>
     <button id="startBtn" disabled>Waiting for Player...</button>
   </div>
 
-  <!-- Game Area Section -->
-  <div id="gameArea" style="display: none; padding: 2rem;">
+  <!-- Game Area Section (Hidden initially) -->
+  <div id="gameArea">
     <h2 style="text-align: center;">Multiplayer Tetris</h2>
 
     <!-- Centered container with fixed width -->
