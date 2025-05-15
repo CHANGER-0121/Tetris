@@ -1,135 +1,115 @@
-/////////////////////////////
-// Socket.IO Setup
-/////////////////////////////
-
-// Connect to deployed backend on Render
 const socket = io("https://tetris-l8kg.onrender.com");
-
 let currentRoomId = null;
+let hasGameStarted = false;
 
-document.getElementById('joinBtn').addEventListener('click', () => {
-  const roomId = document.getElementById('roomId').value.trim();
+const joinBtn = document.getElementById('joinBtn');
+const startBtn = document.getElementById('startBtn');
+const roomIdInput = document.getElementById('roomId');
+
+joinBtn.addEventListener('click', () => {
+  const roomId = roomIdInput.value.trim();
   if (roomId) {
     socket.emit('joinRoom', roomId);
     currentRoomId = roomId;
     document.getElementById('joinDiv').style.display = 'none';
-    document.getElementById('gameArea').style.display = 'block';
-    initGame();
+    document.getElementById('lobbyDiv').style.display = 'block';
+    document.getElementById('roomLabel').textContent = `Room: ${roomId}`;
   }
 });
 
-// Listen for detailed room updates from the server
-socket.on('roomData', (players) => {
-  renderOtherPlayers(players);
+startBtn.addEventListener('click', () => {
+  if (currentRoomId) {
+    socket.emit('startGame', currentRoomId);
+  }
 });
 
-function renderOtherPlayers(players) {
-  const container = document.getElementById('otherPlayers');
-  container.innerHTML = '';
+socket.on('roomData', (players) => {
+  renderOtherPlayers(players);
+  if (Object.keys(players).length === 2) {
+    startBtn.disabled = false;
+    startBtn.textContent = 'Start Game';
+  } else {
+    startBtn.disabled = true;
+    startBtn.textContent = 'Waiting for Player...';
+  }
+});
 
-  Object.entries(players).forEach(([id, pState]) => {
-    if (id === socket.id) return; // Skip rendering yourself
+socket.on('gameStarted', () => {
+  hasGameStarted = true;
+  document.getElementById('lobbyDiv').style.display = 'none';
+  document.getElementById('gameArea').style.display = 'block';
+  initGame();
+});
 
-    const div = document.createElement('div');
-    div.className = 'playerPanel';
-
-    div.innerHTML = `
-      <p><strong>Player:</strong> ${id}</p>
-      <p><strong>Score:</strong> ${pState.score || 0}</p>
-      <canvas id="canvas-${id}" width="${CELL_SIZE * COLS}" height="${CELL_SIZE * ROWS}"></canvas>
-    `;
-
-    container.appendChild(div);
-
-    if (pState.grid) {
-      drawOpponentBoard(`canvas-${id}`, pState.grid, pState.currentPiece, pState.currentRow, pState.currentCol);
-    }
-  });
-}
-
-// Send complete state to the server periodically
 function sendStateToServer() {
-  if (currentRoomId && !isGameOver) {
+  if (currentRoomId && !isGameOver && hasGameStarted) {
     socket.emit('stateUpdate', {
       roomId: currentRoomId,
-      state: {
-        score,
-        grid,
-        currentPiece,
-        currentRow,
-        currentCol
+      state: { score, grid, currentPiece, currentRow, currentCol }
+    });
+  }
+}
+
+function drawOpponentBoard(playerId, playerState) {
+  let canvas = document.getElementById(`opponent-${playerId}`);
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = `opponent-${playerId}`;
+    canvas.width = 300;
+    canvas.height = 600;
+    canvas.style.border = '1px solid #000';
+    canvas.style.margin = '10px';
+    document.getElementById('otherPlayers').appendChild(canvas);
+  }
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const cellSize = 30;
+  const rows = playerState.grid.length;
+  const cols = playerState.grid[0].length;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = playerState.grid[r][c];
+      if (cell) {
+        ctx.fillStyle = cell;
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        ctx.strokeStyle = 'black';
+        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
+      }
+    }
+  }
+
+  if (playerState.currentPiece) {
+    playerState.currentPiece.coords.forEach(([x, y]) => {
+      const r = playerState.currentRow + y;
+      const c = playerState.currentCol + x;
+      if (r >= 0 && r < rows && c >= 0 && c < cols) {
+        ctx.fillStyle = playerState.currentPiece.color;
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        ctx.strokeStyle = 'black';
+        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
       }
     });
   }
 }
 
-/////////////////////////////
-// Multiplayer rendering logic
-/////////////////////////////
+function handleKey(event) {
+  if (!hasGameStarted || isGameOver) return;
 
-function drawOpponentBoard(canvasId, boardGrid, piece, pieceRow, pieceCol) {
-  const canvas = document.getElementById(canvasId);
-  const ctx = canvas.getContext('2d');
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  boardGrid.forEach((row, r) => {
-    row.forEach((cell, c) => {
-      if (cell) drawOpponentSquare(ctx, r, c, cell);
-    });
-  });
-
-  if (piece) {
-    piece.coords.forEach(([x, y]) => {
-      const r = pieceRow + y;
-      const c = pieceCol + x;
-      if (r >= 0) drawOpponentSquare(ctx, r, c, piece.color);
-    });
-  }
-}
-
-function drawOpponentSquare(ctx, row, col, color) {
-  ctx.fillStyle = color;
-  ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-  ctx.strokeRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-}
-
-/////////////////////////////
-// Game Logic Setup
-/////////////////////////////
-
-const COLS = 10, ROWS = 20, CELL_SIZE = 30, DROP_INTERVAL = 500;
-const canvas = document.getElementById('tetris');
-const ctx = canvas.getContext('2d');
-const scoreElem = document.getElementById('score');
-const messageElem = document.getElementById('message');
-
-let grid = [], currentPiece, currentRow, currentCol, score = 0;
-let isGameOver = false, isPaused = false, lastTime = 0, dropCounter = 0;
-
-// Game logic functions assumed to be defined elsewhere:
-// createGrid, getRandomTetromino, spawnNewPiece, isValidPosition,
-// lockPiece, clearLines, rotatePiece, draw, drawSquare,
-// update, event listeners, and initGame
-
-/////////////////////////////
-// Game Loop with Sync
-/////////////////////////////
-
-function update(time = 0) {
-  if (isGameOver) {
-    draw();
-    sendStateToServer();
-    return;
-  }
-
-  const delta = time - lastTime;
-  lastTime = time;
-
-  if (!isPaused) {
-    dropCounter += delta;
-    if (dropCounter > DROP_INTERVAL) {
-      dropCounter = 0;
+  switch (event.key) {
+    case 'ArrowLeft':
+      if (isValidPosition(currentPiece, currentRow, currentCol - 1)) {
+        currentCol--;
+      }
+      break;
+    case 'ArrowRight':
+      if (isValidPosition(currentPiece, currentRow, currentCol + 1)) {
+        currentCol++;
+      }
+      break;
+    case 'ArrowDown':
       if (isValidPosition(currentPiece, currentRow + 1, currentCol)) {
         currentRow++;
       } else {
@@ -137,10 +117,26 @@ function update(time = 0) {
         clearLines();
         spawnNewPiece();
       }
-    }
+      break;
+    case 'ArrowUp':
+      const rotatedPiece = {
+        coords: currentPiece.coords.map(([x, y]) => [-y, x]),
+        color: currentPiece.color
+      };
+      if (isValidPosition(rotatedPiece, currentRow, currentCol)) {
+        currentPiece = rotatedPiece;
+      }
+      break;
+    case ' ':
+      while (isValidPosition(currentPiece, currentRow + 1, currentCol)) {
+        currentRow++;
+      }
+      lockPiece();
+      clearLines();
+      spawnNewPiece();
+      break;
   }
 
   draw();
   sendStateToServer();
-  requestAnimationFrame(update);
 }
