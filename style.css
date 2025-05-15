@@ -7,6 +7,31 @@ html, body {
   color: #ffffff;
 }
 
+/* Hide all sections by default */
+#joinDiv,
+#lobbyDiv,
+#gameArea {
+  display: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Show the active section with smooth animation */
+#joinDiv.active,
+#lobbyDiv.active,
+#gameArea.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  transform: translateY(0);
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #1e1e2f;
+}
+
 canvas {
   border: 2px solid #00ffe0;
   background-color: #2b2b40;
@@ -51,37 +76,12 @@ h2 {
   color: #ff5e5e;
 }
 
-#gameArea,
-#joinDiv,
-#lobbyDiv {
-  min-height: 100vh;
-  padding: 2rem;
-  background-color: #1e1e2f;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-/* Show active section with animation */
-#gameArea.active,
-#joinDiv.active,
-#lobbyDiv.active {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
 #otherPlayers {
   display: flex;
   gap: 20px;
 }
 
-/* Optional responsiveness */
+/* Responsive support */
 @media (max-width: 600px) {
   canvas {
     width: 90vw;
