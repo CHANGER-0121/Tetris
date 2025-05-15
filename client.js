@@ -1,4 +1,4 @@
-const socket = io("https://tetris-l8kg.onrender.com");
+const socket = io("https://tetris-l8kg.onrender.com"); // Replace with your Render backend URL if different
 let currentRoomId = null;
 let hasGameStarted = false;
 
@@ -50,17 +50,30 @@ function sendStateToServer() {
   }
 }
 
+function renderOtherPlayers(players) {
+  const container = document.getElementById('otherPlayers');
+  container.innerHTML = '';
+
+  Object.entries(players).forEach(([id, playerState]) => {
+    if (id === socket.id) return;
+
+    const div = document.createElement('div');
+    div.className = 'playerPanel';
+    div.innerHTML = `
+      <p><strong>Player:</strong> ${id.slice(0, 5)}...</p>
+      <canvas id="opponent-${id}" width="300" height="600"></canvas>
+    `;
+    container.appendChild(div);
+
+    if (playerState.grid) {
+      drawOpponentBoard(id, playerState);
+    }
+  });
+}
+
 function drawOpponentBoard(playerId, playerState) {
-  let canvas = document.getElementById(`opponent-${playerId}`);
-  if (!canvas) {
-    canvas = document.createElement('canvas');
-    canvas.id = `opponent-${playerId}`;
-    canvas.width = 300;
-    canvas.height = 600;
-    canvas.style.border = '1px solid #000';
-    canvas.style.margin = '10px';
-    document.getElementById('otherPlayers').appendChild(canvas);
-  }
+  const canvas = document.getElementById(`opponent-${playerId}`);
+  if (!canvas) return;
 
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
