@@ -57,12 +57,17 @@ h2 {
   min-height: 100vh;
 }
 
-#otherPlayers {
-  display: flex;
-  gap: 20px;
-}
-
 #joinDiv, #lobbyDiv {
   text-align: center;
   padding: 2rem;
+  background-color: #1e1e2f;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#otherPlayers {
+  display: flex;
+  gap: 20px;
 }
