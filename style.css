@@ -51,23 +51,45 @@ h2 {
   color: #ff5e5e;
 }
 
-#gameArea {
+#gameArea,
+#joinDiv,
+#lobbyDiv {
+  min-height: 100vh;
   padding: 2rem;
   background-color: #1e1e2f;
-  min-height: 100vh;
-}
-
-#joinDiv, #lobbyDiv {
-  text-align: center;
-  padding: 2rem;
-  background-color: #1e1e2f;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* Show active section with animation */
+#gameArea.active,
+#joinDiv.active,
+#lobbyDiv.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 #otherPlayers {
   display: flex;
   gap: 20px;
+}
+
+/* Optional responsiveness */
+@media (max-width: 600px) {
+  canvas {
+    width: 90vw;
+    height: auto;
+  }
+
+  #otherPlayers {
+    flex-direction: column;
+    align-items: center;
+  }
 }
