@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Multiplayer Tetris</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="game.js"></script>
+  <script defer src="client.js"></script>
+  <style>
+    canvas {
+      border: 2px solid #333;
+      background-color: #f7f7f7;
+    }
+    .playerPanel {
+      text-align: center;
+    }
+    input, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; font-family: sans-serif; background-color: #f0f0f0;">
+  <div id="joinDiv" style="text-align: center; padding: 2rem;">
+    <h2>Join a Room</h2>
+    <input type="text" id="roomId" placeholder="Enter Room ID" />
+    <button id="joinBtn">Join Room</button>
+  </div>
+  <div id="lobbyDiv" style="display: none; text-align: center; padding: 2rem;">
+    <h2>Lobby</h2>
+    <p id="roomLabel"></p>
+    <button id="startBtn" disabled>Waiting for Player...</button>
+  </div>
+  <div id="gameArea" style="display: none; padding: 2rem;">
+    <h2 style="text-align: center;">Multiplayer Tetris</h2>
+    <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; align-items: flex-start;">
+      <div>
+        <p id="score">Score: 0</p>
+        <canvas id="tetris" width="300" height="600"></canvas>
+        <p id="message"></p>
+      </div>
+      <div id="otherPlayers" style="display: flex; gap: 20px;"></div>
+    </div>
+  </div>
+</body>
+</html>
