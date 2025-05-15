@@ -7,7 +7,6 @@ let canvas, ctx;
 let grid, currentPiece, currentRow, currentCol;
 let score = 0;
 let isGameOver = false;
-let hasGameStarted = false;
 
 function createGrid() {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
