@@ -1,4 +1,4 @@
-const socket = io("https://tetris-l8kg.onrender.com"); // Replace with your Render backend URL if different
+const socket = io("https://tetris-l8kg.onrender.com");
 let currentRoomId = null;
 let hasGameStarted = false;
 
@@ -6,23 +6,29 @@ const joinBtn = document.getElementById('joinBtn');
 const startBtn = document.getElementById('startBtn');
 const roomIdInput = document.getElementById('roomId');
 
+// Join room
 joinBtn.addEventListener('click', () => {
   const roomId = roomIdInput.value.trim();
   if (roomId) {
     socket.emit('joinRoom', roomId);
     currentRoomId = roomId;
-    document.getElementById('joinDiv').style.display = 'none';
-    document.getElementById('lobbyDiv').style.display = 'block';
+
+    // Screen transition: Join → Lobby
+    document.getElementById('joinDiv').classList.remove('active');
+    document.getElementById('lobbyDiv').classList.add('active');
+
     document.getElementById('roomLabel').textContent = `Room: ${roomId}`;
   }
 });
 
+// Start game
 startBtn.addEventListener('click', () => {
   if (currentRoomId) {
     socket.emit('startGame', currentRoomId);
   }
 });
 
+// Handle player list updates
 socket.on('roomData', (players) => {
   renderOtherPlayers(players);
   if (Object.keys(players).length === 2) {
@@ -34,13 +40,18 @@ socket.on('roomData', (players) => {
   }
 });
 
+// Start game (from server)
 socket.on('gameStarted', () => {
   hasGameStarted = true;
-  document.getElementById('lobbyDiv').style.display = 'none';
-  document.getElementById('gameArea').style.display = 'block';
+
+  // Screen transition: Lobby → Game
+  document.getElementById('lobbyDiv').classList.remove('active');
+  document.getElementById('gameArea').classList.add('active');
+
   initGame();
 });
 
+// Send game state
 function sendStateToServer() {
   if (currentRoomId && !isGameOver && hasGameStarted) {
     socket.emit('stateUpdate', {
@@ -50,6 +61,7 @@ function sendStateToServer() {
   }
 }
 
+// Render opponent boards
 function renderOtherPlayers(players) {
   const container = document.getElementById('otherPlayers');
   container.innerHTML = '';
@@ -71,6 +83,7 @@ function renderOtherPlayers(players) {
   });
 }
 
+// Draw opponent board
 function drawOpponentBoard(playerId, playerState) {
   const canvas = document.getElementById(`opponent-${playerId}`);
   if (!canvas) return;
@@ -107,3 +120,8 @@ function drawOpponentBoard(playerId, playerState) {
     });
   }
 }
+
+// ✅ Show joinDiv on page load
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('joinDiv').classList.add('active');
+});
