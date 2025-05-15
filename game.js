@@ -112,7 +112,8 @@ function update() {
 }
 
 function handleKey(event) {
-  if (isGameOver || !hasGameStarted) return;
+  // 👇 FIX: Only use hasGameStarted from global scope (declared in client.js)
+  if (typeof hasGameStarted === 'undefined' || isGameOver || !hasGameStarted) return;
 
   switch (event.key) {
     case 'ArrowLeft':
