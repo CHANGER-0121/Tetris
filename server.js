@@ -1,14 +1,23 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'] }
+});
+
 app.use(cors({ origin: '*', methods: ['GET', 'POST'] }));
 
-const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] },
+//  Serve static files like index.html, client.js, game.js, etc.
+app.use(express.static(__dirname));
+
+//  Route fallback to serve index.html on root
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const rooms = {};
@@ -25,10 +34,15 @@ io.on('connection', (socket) => {
       return;
     }
 
-    room.players[socket.id] = { score: 0, grid: null, currentPiece: null, currentRow: 0, currentCol: 0 };
+    room.players[socket.id] = {
+      score: 0,
+      grid: null,
+      currentPiece: null,
+      currentRow: 0,
+      currentCol: 0
+    };
     socket.join(roomId);
     console.log(`🔗 ${socket.id} joined room ${roomId}`);
-
     io.to(roomId).emit('roomData', room.players);
   });
 
@@ -60,4 +74,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(3000, () => console.log('🚀 Server running on port 3000'));
+//  Use dynamic port for Render, fallback to 3000 for local dev
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
