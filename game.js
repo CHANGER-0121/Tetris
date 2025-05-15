@@ -14,13 +14,13 @@ function createGrid() {
 
 function getRandomTetromino() {
   const tetrominoes = [
-    { shape: [[0,0],[1,0],[2,0],[3,0]], color: 'cyan' },   // I
-    { shape: [[0,0],[1,0],[1,1],[2,1]], color: 'blue' },   // Z
-    { shape: [[0,1],[1,1],[1,0],[2,0]], color: 'red' },    // S
-    { shape: [[0,0],[1,0],[2,0],[2,1]], color: 'orange' }, // L
-    { shape: [[0,0],[1,0],[2,0],[0,1]], color: 'purple' }, // J
-    { shape: [[0,0],[1,0],[0,1],[1,1]], color: 'yellow' }, // O
-    { shape: [[0,1],[1,0],[1,1],[2,1]], color: 'green' }   // T
+    { shape: [[0,0],[1,0],[2,0],[3,0]], color: 'cyan' },
+    { shape: [[0,0],[1,0],[1,1],[2,1]], color: 'blue' },
+    { shape: [[0,1],[1,1],[1,0],[2,0]], color: 'red' },
+    { shape: [[0,0],[1,0],[2,0],[2,1]], color: 'orange' },
+    { shape: [[0,0],[1,0],[2,0],[0,1]], color: 'purple' },
+    { shape: [[0,0],[1,0],[0,1],[1,1]], color: 'yellow' },
+    { shape: [[0,1],[1,0],[1,1],[2,1]], color: 'green' }
   ];
   const t = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
   return { coords: t.shape, color: t.color };
@@ -35,6 +35,14 @@ function initGame() {
   spawnNewPiece();
   document.addEventListener('keydown', handleKey);
   setInterval(update, DROP_INTERVAL);
+
+  // ✅ Prevent arrow keys and space from scrolling the page
+  window.addEventListener('keydown', function(e) {
+    const keysToBlock = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
+    if (keysToBlock.includes(e.key)) {
+      e.preventDefault();
+    }
+  }, false);
 }
 
 function spawnNewPiece() {
@@ -112,7 +120,6 @@ function update() {
 }
 
 function handleKey(event) {
-  // 👇 FIX: Only use hasGameStarted from global scope (declared in client.js)
   if (typeof hasGameStarted === 'undefined' || isGameOver || !hasGameStarted) return;
 
   switch (event.key) {
