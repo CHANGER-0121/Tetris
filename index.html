@@ -3,10 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <title>Multiplayer Tetris</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
   <script src="/socket.io/socket.io.js"></script>
   <script defer src="game.js"></script>
   <script defer src="client.js"></script>
+  <style>
+    canvas {
+      border: 2px solid #333;
+      background-color: #f7f7f7;
+    }
+    .playerPanel {
+      text-align: center;
+    }
+    #gameArea {
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
   <div id="joinDiv">
@@ -23,10 +36,17 @@
 
   <div id="gameArea" style="display: none;">
     <h2>Multiplayer Tetris</h2>
-    <p id="score">Score: 0</p>
-    <canvas id="tetris" width="300" height="600"></canvas>
-    <p id="message"></p>
-    <div id="otherPlayers"></div>
+    <div style="display: flex; gap: 20px; align-items: flex-start;">
+      <!-- Your own game board -->
+      <div>
+        <p id="score">Score: 0</p>
+        <canvas id="tetris" width="300" height="600"></canvas>
+        <p id="message"></p>
+      </div>
+
+      <!-- Opponents' boards -->
+      <div id="otherPlayers" style="display: flex; gap: 20px;"></div>
+    </div>
   </div>
 </body>
 </html>
