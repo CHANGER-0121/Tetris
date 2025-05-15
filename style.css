@@ -1,49 +1,59 @@
 body {
-  background-color: #222;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  text-align: center;
   margin: 0;
   padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #1e1e2f;
+  color: #ffffff;
 }
 
-h1 {
-  margin-top: 20px;
-}
-
-#joinDiv {
-  margin: 20px;
-}
-
-#tetris {
-  background-color: black;
-  border: 2px solid #fff;
-  display: block;
-  margin: 10px auto;
-}
-
-#scoreBoard {
-  margin-top: 10px;
-  font-size: 1.2em;
-}
-
-#message {
-  margin-top: 20px;
-  font-size: 1.2em;
-  color: #ff4444;
-}
-
-#otherPlayers {
-  margin: 20px auto;
-  max-width: 600px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+canvas {
+  border: 2px solid #00ffe0;
+  background-color: #2b2b40;
 }
 
 .playerPanel {
-  background-color: #333;
-  margin: 10px;
-  padding: 10px;
-  border: 1px solid #fff;
+  text-align: center;
+  color: #ffffff;
+}
+
+input, button {
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  margin: 0.5rem;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #00ffe0, #6f00ff);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s;
+}
+
+input {
+  background: #2b2b40;
+  border: 2px solid #00ffe0;
+  color: #ffffff;
+}
+
+button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+h2 {
+  color: #00ffe0;
+}
+
+#message {
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #ff5e5e;
+}
+
+#gameArea {
+  padding: 2rem;
+}
+
+#otherPlayers {
+  display: flex;
+  gap: 20px;
 }
