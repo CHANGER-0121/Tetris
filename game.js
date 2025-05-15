@@ -7,6 +7,7 @@ let canvas, ctx;
 let grid, currentPiece, currentRow, currentCol;
 let score = 0;
 let isGameOver = false;
+let hasGameStarted = false;
 
 function createGrid() {
   return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -107,6 +108,51 @@ function update() {
     clearLines();
     spawnNewPiece();
   }
+  draw();
+  sendStateToServer();
+}
+
+function handleKey(event) {
+  if (isGameOver || !hasGameStarted) return;
+
+  switch (event.key) {
+    case 'ArrowLeft':
+      if (isValidPosition(currentPiece, currentRow, currentCol - 1)) {
+        currentCol--;
+      }
+      break;
+    case 'ArrowRight':
+      if (isValidPosition(currentPiece, currentRow, currentCol + 1)) {
+        currentCol++;
+      }
+      break;
+    case 'ArrowDown':
+      if (isValidPosition(currentPiece, currentRow + 1, currentCol)) {
+        currentRow++;
+      } else {
+        lockPiece();
+        clearLines();
+        spawnNewPiece();
+      }
+      break;
+    case 'ArrowUp':
+      const rotated = currentPiece.coords.map(([x, y]) => [-y, x]);
+      const original = currentPiece.coords;
+      currentPiece.coords = rotated;
+      if (!isValidPosition(currentPiece, currentRow, currentCol)) {
+        currentPiece.coords = original;
+      }
+      break;
+    case ' ':
+      while (isValidPosition(currentPiece, currentRow + 1, currentCol)) {
+        currentRow++;
+      }
+      lockPiece();
+      clearLines();
+      spawnNewPiece();
+      break;
+  }
+
   draw();
   sendStateToServer();
 }
