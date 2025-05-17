@@ -1,95 +1,26 @@
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #1e1e2f;
-  color: #ffffff;
-}
+html,body{height:100%;margin:0;padding:0;font-family:'Segoe UI',sans-serif;background:#1e1e2f;color:#fff}
 
-/* Hide all sections by default */
-#joinDiv,
-#lobbyDiv,
-#gameArea {
-  display: none;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
+/* Hidden by default */
+#joinDiv,#lobbyDiv,#gameArea{display:none;opacity:0;transform:translateY(20px);
+transition:opacity .4s ease,transform .4s ease}
 
-/* Show the active section with smooth animation */
-#joinDiv.active,
-#lobbyDiv.active,
-#gameArea.active {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  opacity: 1;
-  transform: translateY(0);
-  min-height: 100vh;
-  padding: 2rem;
-  background-color: #1e1e2f;
-}
+/* Visible screen */
+#joinDiv.active,#lobbyDiv.active,#gameArea.active{
+display:flex;flex-direction:column;justify-content:center;align-items:center;
+opacity:1;transform:translateY(0);min-height:100vh;padding:2rem;background:#1e1e2f}
 
-canvas {
-  border: 2px solid #00ffe0;
-  background-color: #2b2b40;
-}
+canvas{border:2px solid #00ffe0;background:#2b2b40}
+.playerPanel{text-align:center}
+input,button{padding:.6rem 1rem;font-size:1rem;margin:.5rem;border:none;border-radius:6px;
+background:linear-gradient(135deg,#00ffe0,#6f00ff);color:#fff;cursor:pointer;
+transition:transform .15s ease,opacity .2s}
+input{background:#2b2b40;border:2px solid #00ffe0}
+button:hover{transform:scale(1.05);opacity:.9}
+h2{color:#00ffe0;text-shadow:0 0 5px rgba(0,255,224,.6)}
+#message{margin-top:1rem;font-weight:bold;color:#ff5e5e}
+#otherPlayers{display:flex;gap:20px}
 
-.playerPanel {
-  text-align: center;
-  color: #ffffff;
-}
-
-input, button {
-  padding: 0.6rem 1rem;
-  font-size: 1rem;
-  margin: 0.5rem;
-  border: none;
-  border-radius: 6px;
-  background: linear-gradient(135deg, #00ffe0, #6f00ff);
-  color: white;
-  cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.2s;
-}
-
-input {
-  background: #2b2b40;
-  border: 2px solid #00ffe0;
-  color: #ffffff;
-}
-
-button:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
-}
-
-h2 {
-  color: #00ffe0;
-  text-shadow: 0 0 5px rgba(0, 255, 224, 0.6);
-}
-
-#message {
-  margin-top: 1rem;
-  font-weight: bold;
-  color: #ff5e5e;
-}
-
-#otherPlayers {
-  display: flex;
-  gap: 20px;
-}
-
-/* Responsive support */
-@media (max-width: 600px) {
-  canvas {
-    width: 90vw;
-    height: auto;
-  }
-
-  #otherPlayers {
-    flex-direction: column;
-    align-items: center;
-  }
+@media(max-width:600px){
+  canvas{width:90vw;height:auto}
+  #otherPlayers{flex-direction:column;align-items:center}
 }
