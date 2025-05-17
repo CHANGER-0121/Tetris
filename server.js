@@ -1,79 +1,66 @@
 const express = require('express');
-const http = require('http');
-const path = require('path');
+const http    = require('http');
+const path    = require('path');
 const { Server } = require('socket.io');
-const cors = require('cors');
+const cors    = require('cors');
 
-const app = express();
+const app    = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] }
-});
+const io     = new Server(server, { cors: { origin:'*' } });
 
-app.use(cors({ origin: '*', methods: ['GET', 'POST'] }));
-
-//  Serve static files like index.html, client.js, game.js, etc.
+app.use(cors({ origin:'*' }));
 app.use(express.static(__dirname));
+app.get('/', (req,res)=>res.sendFile(path.join(__dirname,'index.html')));
 
-//  Route fallback to serve index.html on root
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-const rooms = {};
+const rooms = {};   // { roomId: { players:{ socketId:{name,...state}}, hasStarted:false } }
 
 io.on('connection', (socket) => {
-  console.log('🟢 Connected:', socket.id);
+  /* JOIN ROOM */
+  socket.on('joinRoom', ({ roomId, playerName }) => {
+    if (!roomId) return;
+    if (!rooms[roomId]) rooms[roomId] = { players:{}, hasStarted:false };
 
-  socket.on('joinRoom', (roomId) => {
-    if (!rooms[roomId]) rooms[roomId] = { players: {}, hasStarted: false };
-
-    const room = rooms[roomId];
-    if (Object.keys(room.players).length >= 2) {
-      socket.emit('roomFull');
-      return;
+    if (Object.keys(rooms[roomId].players).length >= 2){
+      socket.emit('roomFull'); return;
     }
 
-    room.players[socket.id] = {
-      score: 0,
-      grid: null,
-      currentPiece: null,
-      currentRow: 0,
-      currentCol: 0
+    rooms[roomId].players[socket.id] = {
+      name : playerName || 'Player',
+      score:0, grid:null, currentPiece:null, currentRow:0, currentCol:0
     };
     socket.join(roomId);
-    console.log(`🔗 ${socket.id} joined room ${roomId}`);
-    io.to(roomId).emit('roomData', room.players);
+    io.to(roomId).emit('roomData', rooms[roomId].players);
   });
 
+  /* STATE UPDATE */
   socket.on('stateUpdate', ({ roomId, state }) => {
     const room = rooms[roomId];
-    if (room && room.players[socket.id]) {
-      room.players[socket.id] = state;
+    if (room && room.players[socket.id]){
+      room.players[socket.id] = { ...room.players[socket.id], ...state };
       io.to(roomId).emit('roomData', room.players);
     }
   });
 
+  /* START GAME */
   socket.on('startGame', (roomId) => {
-    if (rooms[roomId]) {
+    if (rooms[roomId]){
       rooms[roomId].hasStarted = true;
       io.to(roomId).emit('gameStarted');
     }
   });
 
+  /* DISCONNECT */
   socket.on('disconnect', () => {
-    for (const roomId in rooms) {
+    for (const roomId in rooms){
       const room = rooms[roomId];
-      if (room.players[socket.id]) {
+      if (room.players[socket.id]){
         delete room.players[socket.id];
         io.to(roomId).emit('roomData', room.players);
-        console.log(`❌ ${socket.id} left room ${roomId}`);
-        if (Object.keys(room.players).length === 0) delete rooms[roomId];
+        if (Object.keys(room.players).length===0) delete rooms[roomId];
       }
     }
   });
 });
 
-//  Use dynamic port for Render, fallback to 3000 for local dev
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+server.listen(PORT, ()=>console.log(`🚀 Server running on ${PORT}`));
