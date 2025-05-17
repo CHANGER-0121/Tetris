@@ -1,127 +1,110 @@
-const socket = io("https://tetris-l8kg.onrender.com");
+const socket = io("https://tetris-l8kg.onrender.com");   // ← backend URL
 let currentRoomId = null;
 let hasGameStarted = false;
 
-const joinBtn = document.getElementById('joinBtn');
-const startBtn = document.getElementById('startBtn');
-const roomIdInput = document.getElementById('roomId');
+const joinBtn         = document.getElementById("joinBtn");
+const startBtn        = document.getElementById("startBtn");
+const roomIdInput     = document.getElementById("roomId");
+const playerNameInput = document.getElementById("playerName");
 
-// Join room
-joinBtn.addEventListener('click', () => {
-  const roomId = roomIdInput.value.trim();
-  if (roomId) {
-    socket.emit('joinRoom', roomId);
-    currentRoomId = roomId;
+/* ───── JOIN ROOM ───── */
+joinBtn.addEventListener("click", () => {
+  const roomId     = roomIdInput.value.trim();
+  const playerName = playerNameInput.value.trim();
+  if (!roomId || !playerName) { alert("Please enter Name and Room ID"); return; }
 
-    // Screen transition: Join → Lobby
-    document.getElementById('joinDiv').classList.remove('active');
-    document.getElementById('lobbyDiv').classList.add('active');
+  socket.emit("joinRoom", { roomId, playerName });
+  currentRoomId = roomId;
 
-    document.getElementById('roomLabel').textContent = `Room: ${roomId}`;
-  }
+  document.getElementById("joinDiv" ).classList.remove("active");
+  document.getElementById("lobbyDiv").classList.add   ("active");
+  document.getElementById("roomLabel").textContent = `Room: ${roomId}`;
 });
 
-// Start game
-startBtn.addEventListener('click', () => {
-  if (currentRoomId) {
-    socket.emit('startGame', currentRoomId);
-  }
+/* ───── START GAME ───── */
+startBtn.addEventListener("click", () => {
+  if (currentRoomId) socket.emit("startGame", currentRoomId);
 });
 
-// Handle player list updates
-socket.on('roomData', (players) => {
+/* ───── SERVER EVENTS ───── */
+socket.on("roomData", (players) => {
   renderOtherPlayers(players);
   if (Object.keys(players).length === 2) {
     startBtn.disabled = false;
-    startBtn.textContent = 'Start Game';
+    startBtn.textContent = "Start Game";
   } else {
     startBtn.disabled = true;
-    startBtn.textContent = 'Waiting for Player...';
+    startBtn.textContent = "Waiting for Player…";
   }
 });
 
-// Start game (from server)
-socket.on('gameStarted', () => {
+socket.on("gameStarted", () => {
   hasGameStarted = true;
-
-  // Screen transition: Lobby → Game
-  document.getElementById('lobbyDiv').classList.remove('active');
-  document.getElementById('gameArea').classList.add('active');
-
+  document.getElementById("lobbyDiv").classList.remove("active");
+  document.getElementById("gameArea").classList.add   ("active");
   initGame();
 });
 
-// Send game state
+/* ───── SEND STATE ───── */
 function sendStateToServer() {
   if (currentRoomId && !isGameOver && hasGameStarted) {
-    socket.emit('stateUpdate', {
+    socket.emit("stateUpdate", {
       roomId: currentRoomId,
       state: { score, grid, currentPiece, currentRow, currentCol }
     });
   }
 }
 
-// Render opponent boards
+/* ───── OPPONENT RENDERING ───── */
 function renderOtherPlayers(players) {
-  const container = document.getElementById('otherPlayers');
-  container.innerHTML = '';
-
-  Object.entries(players).forEach(([id, playerState]) => {
+  const container = document.getElementById("otherPlayers");
+  container.innerHTML = "";
+  Object.entries(players).forEach(([id, p]) => {
     if (id === socket.id) return;
-
-    const div = document.createElement('div');
-    div.className = 'playerPanel';
+    const div = document.createElement("div");
+    div.className = "playerPanel";
     div.innerHTML = `
-      <p><strong>Player:</strong> ${id.slice(0, 5)}...</p>
+      <p><strong>${p.name || id.slice(0,5)}</strong></p>
       <canvas id="opponent-${id}" width="300" height="600"></canvas>
     `;
     container.appendChild(div);
-
-    if (playerState.grid) {
-      drawOpponentBoard(id, playerState);
-    }
+    if (p.grid) drawOpponentBoard(id, p);
   });
 }
 
-// Draw opponent board
-function drawOpponentBoard(playerId, playerState) {
-  const canvas = document.getElementById(`opponent-${playerId}`);
+/* ───── DRAW OPPONENT BOARD ───── */
+function drawOpponentBoard(id, p) {
+  const canvas = document.getElementById(`opponent-${id}`);
   if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const size = 30, rows = p.grid.length, cols = p.grid[0].length;
 
-  const cellSize = 30;
-  const rows = playerState.grid.length;
-  const cols = playerState.grid[0].length;
-
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const cell = playerState.grid[r][c];
-      if (cell) {
+  for (let r=0;r<rows;r++){
+    for (let c=0;c<cols;c++){
+      const cell = p.grid[r][c];
+      if (cell){
         ctx.fillStyle = cell;
-        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-        ctx.strokeStyle = 'black';
-        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        ctx.fillRect(c*size, r*size, size, size);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(c*size, r*size, size, size);
       }
     }
   }
-
-  if (playerState.currentPiece) {
-    playerState.currentPiece.coords.forEach(([x, y]) => {
-      const r = playerState.currentRow + y;
-      const c = playerState.currentCol + x;
-      if (r >= 0 && r < rows && c >= 0 && c < cols) {
-        ctx.fillStyle = playerState.currentPiece.color;
-        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
-        ctx.strokeStyle = 'black';
-        ctx.strokeRect(c * cellSize, r * cellSize, cellSize, cellSize);
+  if (p.currentPiece){
+    p.currentPiece.coords.forEach(([x,y])=>{
+      const rr = p.currentRow + y, cc = p.currentCol + x;
+      if (rr>=0 && rr<rows && cc>=0 && cc<cols){
+        ctx.fillStyle = p.currentPiece.color;
+        ctx.fillRect(cc*size, rr*size, size, size);
+        ctx.strokeStyle="#000";
+        ctx.strokeRect(cc*size, rr*size, size, size);
       }
     });
   }
 }
 
-// ✅ Show joinDiv on page load
-window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('joinDiv').classList.add('active');
+/* ───── SHOW JOIN SCREEN ON LOAD ───── */
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("joinDiv").classList.add("active");
 });
