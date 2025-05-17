@@ -5,23 +5,21 @@
   <title>Multiplayer Tetris</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
-
-  <!-- scripts -->
   <script src="/socket.io/socket.io.js"></script>
   <script defer src="game.js"></script>
   <script defer src="client.js"></script>
 </head>
 <body>
-  <!-- ──────── JOIN SCREEN ──────── -->
+  <!-- ░░ JOIN SCREEN ░░ -->
   <div id="joinDiv" class="active">
     <h2>Join a Multiplayer Tetris Room</h2>
 
     <div style="max-width:400px;margin:auto;text-align:left;">
       <h3 style="color:#00ffe0">How it works</h3>
       <ul style="font-size:.95rem;line-height:1.6">
-        <li>Enter <strong>your name</strong> and a <strong>Room ID</strong>.</li>
-        <li>Share the Room ID with a friend so you join together.</li>
-        <li>When 2 players are inside, <strong>Start Game</strong> activates automatically.</li>
+        <li>Enter <strong>your name</strong> and a <strong>Room&nbsp;ID</strong>.</li>
+        <li>Share the Room ID with a friend so you join the same room.</li>
+        <li>Once <strong>both players</strong> are present, click <em>Start&nbsp;Game</em> to begin.</li>
         <li><kbd>◀︎▶︎▼</kbd> move &nbsp;|&nbsp; <kbd>▲</kbd> rotate &nbsp;|&nbsp; <kbd>Space</kbd> hard-drop.</li>
       </ul>
     </div>
@@ -31,26 +29,25 @@
     <button id="joinBtn">Join Room</button>
   </div>
 
-  <!-- ──────── LOBBY ──────── -->
+  <!-- ░░ LOBBY ░░ -->
   <div id="lobbyDiv">
     <h2>Lobby</h2>
     <p id="roomLabel"></p>
     <button id="startBtn" disabled>Waiting for Player…</button>
   </div>
 
-  <!-- ──────── GAME AREA ──────── -->
+  <!-- ░░ GAME AREA ░░ -->
   <div id="gameArea">
     <h2 style="text-align:center">Multiplayer Tetris</h2>
     <div style="max-width:900px;margin:0 auto;">
       <div style="display:flex;justify-content:center;gap:40px;align-items:flex-start;">
-        <!-- Game board -->
+        <!-- Your board -->
         <div>
           <p id="score">Score: 0</p>
           <canvas id="tetris" width="300" height="600"></canvas>
           <p id="message"></p>
         </div>
-
-        <!-- Opponent boards -->
+        <!-- Opponents -->
         <div id="otherPlayers" style="display:flex;gap:20px;"></div>
       </div>
     </div>
