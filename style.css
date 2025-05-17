@@ -3,10 +3,12 @@ html,body{height:100%;margin:0;padding:0;font-family:'Segoe UI',sans-serif;backg
 /* SECTION VISIBILITY */
 #joinDiv,#lobbyDiv,#gameArea{display:none;opacity:0;transform:translateY(20px);
 transition:opacity .4s ease,transform .4s ease}
-#joinDiv.active,#lobbyDiv.active{display:flex;flex-direction:column;align-items:center;
-justify-content:flex-start;padding-top:8vh;min-height:100vh;background:#1e1e2f;opacity:1;transform:translateY(0)}
-#gameArea.active{display:flex;flex-direction:column;align-items:center;justify-content:center;
-min-height:100vh;padding:2rem;background:#1e1e2f;opacity:1;transform:translateY(0)}
+#joinDiv.active,#lobbyDiv.active{
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+ padding-top:8vh;min-height:100vh;background:#1e1e2f;opacity:1;transform:translateY(0)}
+#gameArea.active{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ min-height:100vh;padding:2rem;background:#1e1e2f;opacity:1;transform:translateY(0)}
 
 /* JOIN SCREEN LAYOUT */
 .joinContent{display:flex;gap:60px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
