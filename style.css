@@ -4,10 +4,18 @@ html,body{height:100%;margin:0;padding:0;font-family:'Segoe UI',sans-serif;backg
 #joinDiv,#lobbyDiv,#gameArea{display:none;opacity:0;transform:translateY(20px);
 transition:opacity .4s ease,transform .4s ease}
 
-/* Visible screen */
-#joinDiv.active,#lobbyDiv.active,#gameArea.active{
-display:flex;flex-direction:column;justify-content:center;align-items:center;
-opacity:1;transform:translateY(0);min-height:100vh;padding:2rem;background:#1e1e2f}
+/* Visible JOIN / LOBBY screens : aligned nearer top */
+#joinDiv.active,#lobbyDiv.active{
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+ padding-top:10vh;min-height:100vh;padding-left:2rem;padding-right:2rem;background:#1e1e2f;
+ opacity:1;transform:translateY(0)
+}
+
+/* Visible GAME screen (centred) */
+#gameArea.active{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ min-height:100vh;padding:2rem;background:#1e1e2f;opacity:1;transform:translateY(0)
+}
 
 canvas{border:2px solid #00ffe0;background:#2b2b40}
 .playerPanel{text-align:center}
