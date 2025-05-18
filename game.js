@@ -1,165 +1,147 @@
-const ROWS = 20;
-const COLS = 10;
-const CELL_SIZE = 30;
-const DROP_INTERVAL = 1000;
+/* ──────────── CONFIG ──────────── */
+const ROWS          = 20;
+const COLS          = 10;
+const CELL_SIZE     = 30;
+const DROP_INTERVAL = 1000;   // ms
 
+/* ──────────── STATE ──────────── */
 let canvas, ctx;
 let grid, currentPiece, currentRow, currentCol;
-let score = 0;
-let isGameOver = false;
+let score        = 0;
+let isGameOver   = false;
+let gamePaused   = false;   // set by client.js togglePause()
 
-function createGrid() {
-  return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
-}
+/* ──────────── TETROMINO LIST ──────────── */
+const PIECES = [
+  { shape:[[0,0],[1,0],[2,0],[3,0]],           color:'cyan'   }, // I
+  { shape:[[0,0],[1,0],[1,1],[2,1]],           color:'blue'   }, // Z
+  { shape:[[0,1],[1,1],[1,0],[2,0]],           color:'red'    }, // S
+  { shape:[[0,0],[1,0],[2,0],[2,1]],           color:'orange' }, // L
+  { shape:[[0,0],[1,0],[2,0],[0,1]],           color:'purple' }, // J
+  { shape:[[0,0],[1,0],[0,1],[1,1]],           color:'yellow' }, // O
+  { shape:[[0,1],[1,0],[1,1],[2,1]],           color:'green'  }  // T
+];
 
-function getRandomTetromino() {
-  const tetrominoes = [
-    { shape: [[0,0],[1,0],[2,0],[3,0]], color: 'cyan' },
-    { shape: [[0,0],[1,0],[1,1],[2,1]], color: 'blue' },
-    { shape: [[0,1],[1,1],[1,0],[2,0]], color: 'red' },
-    { shape: [[0,0],[1,0],[2,0],[2,1]], color: 'orange' },
-    { shape: [[0,0],[1,0],[2,0],[0,1]], color: 'purple' },
-    { shape: [[0,0],[1,0],[0,1],[1,1]], color: 'yellow' },
-    { shape: [[0,1],[1,0],[1,1],[2,1]], color: 'green' }
-  ];
-  const t = tetrominoes[Math.floor(Math.random() * tetrominoes.length)];
-  return { coords: t.shape, color: t.color };
-}
-
+/* ──────────── INITIALISE ──────────── */
 function initGame() {
-  canvas = document.getElementById('tetris');
-  ctx = canvas.getContext('2d');
-  grid = createGrid();
-  score = 0;
+  canvas = document.getElementById("tetris");
+  ctx    = canvas.getContext("2d");
+  grid   = createGrid();
+  score  = 0;
   isGameOver = false;
   spawnNewPiece();
-  document.addEventListener('keydown', handleKey);
+
+  document.addEventListener("keydown", handleKey);
+
   setInterval(update, DROP_INTERVAL);
 
-  // ✅ Prevent arrow keys and space from scrolling the page
-  window.addEventListener('keydown', function(e) {
-    const keysToBlock = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
-    if (keysToBlock.includes(e.key)) {
+  // prevent arrow keys from scrolling page
+  window.addEventListener("keydown", (e)=>{
+    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))
       e.preventDefault();
-    }
-  }, false);
+  });
 }
 
+/* ──────────── GRID & PIECES ──────────── */
+function createGrid() {
+  return Array.from({length:ROWS}, ()=>Array(COLS).fill(null));
+}
+function randomPiece() {
+  const t = PIECES[Math.floor(Math.random()*PIECES.length)];
+  return { coords: t.shape.map(([x,y])=>[x,y]), color: t.color };
+}
 function spawnNewPiece() {
-  currentPiece = getRandomTetromino();
-  currentRow = 0;
-  currentCol = Math.floor(COLS / 2) - 1;
-  if (!isValidPosition(currentPiece, currentRow, currentCol)) {
+  currentPiece = randomPiece();
+  currentRow   = 0;
+  currentCol   = Math.floor(COLS/2)-1;
+  if (!isValidPosition(currentPiece,currentRow,currentCol)) {
     isGameOver = true;
-    document.getElementById('message').textContent = 'Game Over';
+    document.getElementById("message").textContent = "Game Over";
   }
 }
 
-function isValidPosition(piece, row, col) {
-  return piece.coords.every(([x, y]) => {
-    const r = row + y;
-    const c = col + x;
-    return r >= 0 && r < ROWS && c >= 0 && c < COLS && !grid[r][c];
+/* ──────────── VALIDATION ──────────── */
+function isValidPosition(piece,row,col) {
+  return piece.coords.every(([x,y])=>{
+    const r=row+y, c=col+x;
+    return r>=0 && r<ROWS && c>=0 && c<COLS && !grid[r][c];
   });
 }
 
+/* ──────────── LOCK & CLEAR ──────────── */
 function lockPiece() {
-  currentPiece.coords.forEach(([x, y]) => {
-    const r = currentRow + y;
-    const c = currentCol + x;
-    if (r >= 0) grid[r][c] = currentPiece.color;
+  currentPiece.coords.forEach(([x,y])=>{
+    const r=currentRow+y, c=currentCol+x;
+    if (r>=0) grid[r][c] = currentPiece.color;
   });
 }
-
 function clearLines() {
-  for (let r = ROWS - 1; r >= 0; r--) {
-    if (grid[r].every(cell => cell)) {
-      grid.splice(r, 1);
-      grid.unshift(new Array(COLS).fill(null));
-      score += 100;
-      document.getElementById('score').textContent = `Score: ${score}`;
+  for (let r=ROWS-1;r>=0;r--){
+    if (grid[r].every(cell=>cell)){
+      grid.splice(r,1);
+      grid.unshift(Array(COLS).fill(null));
+      score+=100;
+      document.getElementById("score").textContent=`Score: ${score}`;
       r++;
     }
   }
 }
 
-function drawSquare(ctx, row, col, color) {
+/* ──────────── DRAWING ──────────── */
+function drawSquare(r,c,color){
   ctx.fillStyle = color;
-  ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-  ctx.strokeStyle = 'black';
-  ctx.strokeRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  ctx.fillRect(c*CELL_SIZE,r*CELL_SIZE,CELL_SIZE,CELL_SIZE);
+  ctx.strokeStyle="#000";
+  ctx.strokeRect(c*CELL_SIZE,r*CELL_SIZE,CELL_SIZE,CELL_SIZE);
 }
-
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  grid.forEach((row, r) => {
-    row.forEach((cell, c) => {
-      if (cell) drawSquare(ctx, r, c, cell);
-    });
-  });
-  if (currentPiece) {
-    currentPiece.coords.forEach(([x, y]) => {
-      const r = currentRow + y;
-      const c = currentCol + x;
-      if (r >= 0) drawSquare(ctx, r, c, currentPiece.color);
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  grid.forEach((row,r)=>row.forEach((cell,c)=>cell&&drawSquare(r,c,cell)));
+  if (currentPiece){
+    currentPiece.coords.forEach(([x,y])=>{
+      const r=currentRow+y,c=currentCol+x;
+      if (r>=0) drawSquare(r,c,currentPiece.color);
     });
   }
 }
 
-function update() {
-  if (isGameOver) return;
-  if (isValidPosition(currentPiece, currentRow + 1, currentCol)) {
+/* ──────────── GAME LOOP ──────────── */
+function update(){
+  if (isGameOver || gamePaused) return;
+  if (isValidPosition(currentPiece,currentRow+1,currentCol)){
     currentRow++;
-  } else {
-    lockPiece();
-    clearLines();
-    spawnNewPiece();
+  }else{
+    lockPiece(); clearLines(); spawnNewPiece();
   }
-  draw();
-  sendStateToServer();
+  draw(); sendStateToServer();
 }
 
-function handleKey(event) {
-  if (typeof hasGameStarted === 'undefined' || isGameOver || !hasGameStarted) return;
+/* ──────────── KEY HANDLER ──────────── */
+function handleKey(e){
+  if (isGameOver || gamePaused || typeof hasGameStarted==='undefined'||!hasGameStarted)
+    return;
 
-  switch (event.key) {
-    case 'ArrowLeft':
-      if (isValidPosition(currentPiece, currentRow, currentCol - 1)) {
-        currentCol--;
-      }
+  switch(e.key){
+    case "ArrowLeft":
+      if (isValidPosition(currentPiece,currentRow,currentCol-1)) currentCol--; break;
+    case "ArrowRight":
+      if (isValidPosition(currentPiece,currentRow,currentCol+1)) currentCol++; break;
+    case "ArrowDown":
+      if (isValidPosition(currentPiece,currentRow+1,currentCol)) currentRow++;
+      else { lockPiece(); clearLines(); spawnNewPiece(); }
       break;
-    case 'ArrowRight':
-      if (isValidPosition(currentPiece, currentRow, currentCol + 1)) {
-        currentCol++;
-      }
+    case "ArrowUp": {   // rotate
+      const rot = currentPiece.coords.map(([x,y])=>[-y,x]);
+      const backup = currentPiece.coords;
+      currentPiece.coords = rot;
+      if (!isValidPosition(currentPiece,currentRow,currentCol))
+        currentPiece.coords = backup;
       break;
-    case 'ArrowDown':
-      if (isValidPosition(currentPiece, currentRow + 1, currentCol)) {
-        currentRow++;
-      } else {
-        lockPiece();
-        clearLines();
-        spawnNewPiece();
-      }
-      break;
-    case 'ArrowUp':
-      const rotated = currentPiece.coords.map(([x, y]) => [-y, x]);
-      const original = currentPiece.coords;
-      currentPiece.coords = rotated;
-      if (!isValidPosition(currentPiece, currentRow, currentCol)) {
-        currentPiece.coords = original;
-      }
-      break;
-    case ' ':
-      while (isValidPosition(currentPiece, currentRow + 1, currentCol)) {
-        currentRow++;
-      }
-      lockPiece();
-      clearLines();
-      spawnNewPiece();
+    }
+    case " ":  // hard drop
+      while (isValidPosition(currentPiece,currentRow+1,currentCol)) currentRow++;
+      lockPiece(); clearLines(); spawnNewPiece();
       break;
   }
-
-  draw();
-  sendStateToServer();
+  draw(); sendStateToServer();
 }
