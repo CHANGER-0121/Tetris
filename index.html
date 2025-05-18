@@ -19,11 +19,12 @@
         <ul>
           <li>Enter <strong>your name</strong> and a <strong>Room&nbsp;ID</strong>.</li>
           <li>Share that Room ID with a friend so you both join the same room.</li>
-          <li>When <strong>both players</strong> are present, <strong>either</strong> one can click
-              <em>Start&nbsp;Game</em> — it starts the game for both of you.</li>
-          <li>Use the <strong>arrow&nbsp;keys</strong> to move pieces
-              (<kbd>◀︎</kbd>/<kbd>▶︎</kbd>/<kbd>▼</kbd>) and <kbd>▲</kbd> to rotate.
-              Press <kbd>Space</kbd> for a hard-drop.</li>
+          <li>When <strong>both players</strong> are present, either one can click
+              <em>Start&nbsp;Game</em>; it starts for both of you.</li>
+          <li>Use <strong>arrow&nbsp;keys</strong> to move (<kbd>◀︎</kbd>/<kbd>▶︎</kbd>/<kbd>▼</kbd>),
+              <kbd>▲</kbd> to rotate &nbsp;|&nbsp; <kbd>Space</kbd> to hard-drop.</li>
+          <li>Need a break? Click the <strong>Pause</strong> button at any time —
+              the game pauses (and later resumes) for <em>both</em> players.</li>
         </ul>
       </div>
 
@@ -47,15 +48,17 @@
   <!-- ░░ GAME AREA ░░ -->
   <div id="gameArea">
     <h2 style="text-align:center">Multiplayer Tetris</h2>
+
+    <!-- Pause button -->
+    <button id="pauseBtn" class="pauseButton">Pause</button>
+
     <div style="max-width:900px;margin:0 auto;">
       <div style="display:flex;justify-content:center;gap:40px;align-items:flex-start;">
-        <!-- Your board -->
         <div>
           <p id="score">Score: 0</p>
           <canvas id="tetris" width="300" height="600"></canvas>
           <p id="message"></p>
         </div>
-        <!-- Opponents -->
         <div id="otherPlayers" style="display:flex;gap:20px;"></div>
       </div>
     </div>
