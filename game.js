@@ -9,7 +9,6 @@ let canvas, ctx;
 let grid, currentPiece, currentRow, currentCol;
 let score        = 0;
 let isGameOver   = false;
-let gamePaused   = false;   // set by client.js togglePause()
 
 /* ──────────── TETROMINO LIST ──────────── */
 const PIECES = [
