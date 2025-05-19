@@ -4,21 +4,21 @@ const path    = require('path');
 const { Server } = require('socket.io');
 const cors    = require('cors');
 
-const app    = express();
+const app = express();
 const server = http.createServer(app);
-const io     = new Server(server,{cors:{origin:'*'}});
+const io  = new Server(server,{cors:{origin:'*'}});
 
 app.use(cors({origin:'*'}));
 app.use(express.static(__dirname));
 app.get('/',(_,res)=>res.sendFile(path.join(__dirname,'index.html')));
 
-/* —— room map —— */
+/* room map */
 const rooms={};
 
 io.on('connection',socket=>{
   /* JOIN */
   socket.on('joinRoom',({roomId,playerName})=>{
-    if(!roomId)return;
+    if(!roomId) return;
     if(!rooms[roomId]) rooms[roomId]={players:{},hasStarted:false};
     if(Object.keys(rooms[roomId].players).length>=2){socket.emit('roomFull');return;}
     rooms[roomId].players[socket.id]={
@@ -48,6 +48,20 @@ io.on('connection',socket=>{
   /* END GAME */
   socket.on('endGame', roomId=>io.to(roomId).emit('endGame'));
 
+  /* RESTART GAME */
+  socket.on('restartGame', roomId=>{
+    const room=rooms[roomId];
+    if(room){
+      // reset each player's state
+      Object.keys(room.players).forEach(id=>{
+        room.players[id]={...room.players[id],
+          score:0,grid:null,currentPiece:null,currentRow:0,currentCol:0};
+      });
+      io.to(roomId).emit('roomData',room.players);
+      io.to(roomId).emit('gameRestart');
+    }
+  });
+
   /* DISCONNECT */
   socket.on('disconnect',()=>{
     for(const roomId in rooms){
@@ -62,4 +76,4 @@ io.on('connection',socket=>{
 });
 
 const PORT=process.env.PORT||3000;
-server.listen(PORT,()=>console.log(`🚀 Server on ${PORT}`));
+server.listen(PORT,()=>console.log(`🚀 Server running on ${PORT}`));
