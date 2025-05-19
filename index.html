@@ -10,7 +10,7 @@
   <script defer src="client.js"></script>
 </head>
 <body>
-  <!-- ░░ JOIN SCREEN ░░ -->
+  <!-- ░░ JOIN ░░ -->
   <div id="joinDiv" class="active">
     <div class="joinContent">
       <!-- Rules (left) -->
@@ -21,8 +21,9 @@
           <li>Share that ID so you both join the same room.</li>
           <li>When <strong>both players</strong> are present, either one can click
               <em>Start&nbsp;Game</em>; it begins for both.</li>
-          <li>Controls – <strong>arrow&nbsp;keys</strong> move/rotate, <kbd>Space</kbd> hard-drop.</li>
-          <li>Need a break? Click <strong>Pause game</strong>. Either player can resume.</li>
+          <li>Controls – arrows move / rotate, <kbd>Space</kbd> hard-drop.</li>
+          <li>Click <strong>Pause game</strong> to pause for both players, then
+              <strong>End game</strong> to finish the match.</li>
         </ul>
       </div>
 
@@ -43,14 +44,15 @@
     <button id="startBtn" disabled>Waiting for Player…</button>
   </div>
 
-  <!-- ░░ GAME AREA ░░ -->
+  <!-- ░░ GAME ░░ -->
   <div id="gameArea">
     <h2 style="text-align:center">Multiplayer Tetris</h2>
 
-    <!--  Pause / Resume button (right-side) -->
+    <!-- control buttons (right) -->
     <button id="pauseBtn" class="pauseButton">Pause&nbsp;game</button>
+    <button id="endBtn"   class="endButton"  style="display:none;">End&nbsp;game</button>
 
-    <!-- Boards wrapper -->
+    <!-- Boards -->
     <div style="max-width:900px;margin:0 auto;">
       <div style="display:flex;justify-content:center;gap:40px;align-items:flex-start;">
         <!-- Your board -->
