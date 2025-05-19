@@ -13,21 +13,17 @@
   <!-- ░░ JOIN ░░ -->
   <div id="joinDiv" class="active">
     <div class="joinContent">
-      <!-- Rules (left) -->
       <div class="rules">
         <h3>How it works</h3>
         <ul>
-          <li>Enter <strong>your name</strong> and a <strong>Room&nbsp;ID</strong>.</li>
-          <li>Share that ID so you both join the same room.</li>
-          <li>When <strong>both players</strong> are present, either one can click
-              <em>Start&nbsp;Game</em>; it begins for both.</li>
-          <li>Controls – arrows move / rotate, <kbd>Space</kbd> hard-drop.</li>
-          <li>Click <strong>Pause game</strong> to pause for both players, then
-              <strong>End game</strong> to finish the match.</li>
+          <li>Enter <strong>your name</strong> and a <strong>Room ID</strong>.</li>
+          <li>Share the ID so you both join the same room.</li>
+          <li>When <strong>both players</strong> are present, either one can click <em>Start Game</em>.</li>
+          <li>Arrow keys move / rotate, <kbd>Space</kbd> hard-drops.</li>
+          <li>Click <strong>Pause game</strong> to pause for both players, then <strong>End game</strong> to finish.</li>
         </ul>
       </div>
 
-      <!-- Form (center) -->
       <div class="joinForm">
         <h2>Join a Multiplayer Tetris Room</h2>
         <input type="text" id="playerName" placeholder="Enter your name" />
@@ -48,22 +44,27 @@
   <div id="gameArea">
     <h2 style="text-align:center">Multiplayer Tetris</h2>
 
-    <!-- control buttons (right) -->
     <button id="pauseBtn" class="pauseButton">Pause&nbsp;game</button>
-    <button id="endBtn"   class="endButton"  style="display:none;">End&nbsp;game</button>
+    <button id="endBtn"   class="endButton" style="display:none;">End&nbsp;game</button>
 
-    <!-- Boards -->
     <div style="max-width:900px;margin:0 auto;">
       <div style="display:flex;justify-content:center;gap:40px;align-items:flex-start;">
-        <!-- Your board -->
         <div>
           <p id="score">Score: 0</p>
           <canvas id="tetris" width="300" height="600"></canvas>
           <p id="message"></p>
         </div>
-        <!-- Opponents -->
         <div id="otherPlayers" style="display:flex;gap:20px;"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- ░░ GAME OVER MODAL ░░ -->
+  <div id="gameOverModal" class="modal">
+    <div class="modalContent">
+      <h3>Game Ended</h3>
+      <button id="restartBtn" class="modalBtn">Restart</button>
+      <button id="menuBtn"    class="modalBtn">Main&nbsp;Menu</button>
     </div>
   </div>
 </body>
