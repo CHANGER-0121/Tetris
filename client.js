@@ -1,15 +1,18 @@
-/*************************************************************************
- * client.js  — Pause / Resume / End-game logic
- *************************************************************************/
+/****************************************************************
+ * client.js  — Pause / Resume / End and Game Over dialog
+ ****************************************************************/
 const socket = io("https://tetris-l8kg.onrender.com");
 
 let currentRoomId=null, hasGameStarted=false, gamePaused=false;
 
-/* DOM */
+/* DOM refs */
 const joinBtn  = document.getElementById("joinBtn");
 const startBtn = document.getElementById("startBtn");
 const pauseBtn = document.getElementById("pauseBtn");
 const endBtn   = document.getElementById("endBtn");
+const modal    = document.getElementById("gameOverModal");
+const restartBtn = document.getElementById("restartBtn");
+const menuBtn    = document.getElementById("menuBtn");
 const roomIdInput = document.getElementById("roomId");
 const nameInput   = document.getElementById("playerName");
 
@@ -37,26 +40,31 @@ socket.on("resumeGame",()=>setPaused(false));
 
 function setPaused(p){
   gamePaused=p;
-  pauseBtn.textContent= p?"Resume game":"Pause game";
-  endBtn.style.display= p?"inline-block":"none";
-  document.getElementById("message").textContent= p?"Game Paused":"";
+  pauseBtn.textContent = p? "Resume game" : "Pause game";
+  endBtn.style.display = p? "inline-block" : "none";
+  document.getElementById("message").textContent = p? "Game Paused" : "";
 }
 
 /* —— END GAME —— */
 endBtn.addEventListener("click",()=> currentRoomId && socket.emit("endGame",currentRoomId));
-socket.on("endGame",()=>{
+socket.on("endGame", showGameOverDialog);
+
+/* Dialog buttons: both simply reload page for now */
+restartBtn.addEventListener("click",()=> location.reload());
+menuBtn.addEventListener("click",   ()=> location.reload());
+
+function showGameOverDialog(){
   isGameOver=true; gamePaused=false;
-  pauseBtn.style.display="none";
-  endBtn.style.display="none";
-  document.getElementById("message").textContent="Game Ended";
-});
+  pauseBtn.style.display="none"; endBtn.style.display="none";
+  modal.classList.add("active");
+}
 
 /* —— ROOM DATA —— */
 socket.on("roomData",(players)=>{
   renderOtherPlayers(players);
-  const ready=Object.keys(players).length===2;
-  startBtn.disabled=!ready;
-  startBtn.textContent=ready?"Start Game":"Waiting…";
+  const ready = Object.keys(players).length===2;
+  startBtn.disabled = !ready;
+  startBtn.textContent = ready? "Start Game":"Waiting…";
 });
 
 /* —— GAME STARTED —— */
@@ -75,7 +83,7 @@ function sendStateToServer(){
   }
 }
 
-/* —— RENDER OPPONENTS —— */
+/* —— Opponent rendering (unchanged) —— */
 function renderOtherPlayers(players){
   const container=document.getElementById("otherPlayers");
   container.innerHTML="";
@@ -84,19 +92,17 @@ function renderOtherPlayers(players){
     const wrap=document.createElement("div");
     wrap.className="playerPanel";
     wrap.innerHTML=`<p><strong>${p.name||id.slice(0,5)}</strong></p>
-                    <canvas id="opponent-${id}" width="300" height="600"></canvas>`;
+      <canvas id="opponent-${id}" width="300" height="600"></canvas>`;
     container.appendChild(wrap);
     if(p.grid) drawOpponentBoard(id,p);
   });
 }
-
-/* —— Draw opponent board —— */
 function drawOpponentBoard(id,p){
   const canvas=document.getElementById(`opponent-${id}`);
   if(!canvas) return;
   const ctx=canvas.getContext("2d"), size=30, rows=p.grid.length, cols=p.grid[0].length;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
     const cell=p.grid[r][c];
     if(cell){ctx.fillStyle=cell;ctx.fillRect(c*size,r*size,size,size);
              ctx.strokeStyle="#000";ctx.strokeRect(c*size,r*size,size,size);}
@@ -114,6 +120,6 @@ function drawOpponentBoard(id,p){
   }
 }
 
-/* initial screen */
+/* initial */
 window.addEventListener("DOMContentLoaded",()=>
   document.getElementById("joinDiv").classList.add("active"));
