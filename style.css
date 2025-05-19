@@ -1,50 +1,57 @@
-/* —— core layout —— */
-html,body{height:100%;margin:0;padding:0;font-family:'Segoe UI',sans-serif;
-background:#1e1e2f;color:#fff}
+/* —— page basics —— */
+html,body{height:100%;margin:0;padding:0;font-family:'Segoe UI',sans-serif;background:#1e1e2f;color:#fff}
 
-/* SECTION visibility / animation */
+/* SECTION visibility */
 #joinDiv,#lobbyDiv,#gameArea{display:none;opacity:0;transform:translateY(20px);
-transition:opacity .4s ease,transform .4s ease}
+transition:.4s}
 #joinDiv.active,#lobbyDiv.active{
  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
- padding-top:8vh;min-height:100vh;background:#1e1e2f;
- opacity:1;transform:translateY(0)}
+ padding-top:8vh;min-height:100vh;background:#1e1e2f;opacity:1;transform:translateY(0)}
 #gameArea.active{
  display:flex;flex-direction:column;align-items:center;justify-content:center;
- min-height:100vh;padding:2rem;background:#1e1e2f;
- opacity:1;transform:translateY(0)}
+ min-height:100vh;padding:2rem;background:#1e1e2f;opacity:1;transform:translateY(0)}
 
-/* —— join screen layout —— */
-.joinContent{display:flex;gap:60px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
-.rules{max-width:320px;text-align:left}
-.rules h3{color:#00ffe0;margin-top:0}
-.rules ul{list-style:disc;padding-left:20px;font-size:.95rem;line-height:1.6}
-.joinForm{display:flex;flex-direction:column;align-items:center;gap:.7rem;text-align:center}
+/* JOIN layout */
+.joinContent{display:flex;gap:60px;flex-wrap:wrap;justify-content:center}
+.rules{max-width:320px}
+.rules h3{color:#00ffe0;margin:0}
+.rules ul{padding-left:20px;line-height:1.6;font-size:.95rem}
+.joinForm{display:flex;flex-direction:column;gap:.7rem;align-items:center}
 
-/* —— Pause / End buttons —— */
-.pauseButton,.endButton{
- position:absolute;right:1.5rem;padding:.6rem 1.3rem;border:none;border-radius:6px;
- font-weight:bold;color:#fff;cursor:pointer;transition:.15s ease;z-index:10}
-.pauseButton{top:45%;transform:translateY(-50%);
- background:linear-gradient(135deg,#ffbe0b,#ff006e)}
-.endButton  {top:60%;transform:translateY(-50%);
- background:linear-gradient(135deg,#e63946,#900c3f)}
-.pauseButton:hover,.endButton:hover{transform:translateY(-50%) scale(1.05);opacity:.9}
-
-/* —— common UI —— */
-canvas{border:2px solid #00ffe0;background:#2b2b40}
-.playerPanel{text-align:center}
-input,button:not(.pauseButton):not(.endButton){
- padding:.6rem 1rem;font-size:1rem;margin:.3rem;border:none;border-radius:6px;
- background:linear-gradient(135deg,#00ffe0,#6f00ff);color:#fff;cursor:pointer;
- transition:transform .15s ease,opacity .2s}
+/* Buttons (common) */
+input,button:not(.pauseButton):not(.endButton):not(.modalBtn){
+ padding:.6rem 1rem;margin:.3rem;border:none;border-radius:6px;
+ background:linear-gradient(135deg,#00ffe0,#6f00ff);color:#fff;font-size:1rem;
+ cursor:pointer;transition:.15s}
 input{background:#2b2b40;border:2px solid #00ffe0}
 button:hover{transform:scale(1.05);opacity:.9}
+
+/* Pause / End btns */
+.pauseButton,.endButton{position:absolute;right:1.5rem;z-index:10;border:none;border-radius:6px;
+font-weight:bold;color:#fff;padding:.6rem 1.3rem;cursor:pointer;transition:.15s}
+.pauseButton{top:45%;transform:translateY(-50%);
+background:linear-gradient(135deg,#ffbe0b,#ff006e)}
+.endButton{top:60%;transform:translateY(-50%);
+background:linear-gradient(135deg,#e63946,#900c3f)}
+.pauseButton:hover,.endButton:hover{transform:translateY(-50%) scale(1.05);opacity:.9}
+
+/* Canvas etc */
+canvas{border:2px solid #00ffe0;background:#2b2b40}
+.playerPanel{text-align:center}
 h2{color:#00ffe0;text-shadow:0 0 5px rgba(0,255,224,.6)}
 #message{margin-top:1rem;font-weight:bold;color:#ff5e5e}
 #otherPlayers{display:flex;gap:20px}
 
-/* —— mobile —— */
+/* —— Modal —— */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);
+align-items:center;justify-content:center;z-index:20}
+.modal.active{display:flex}
+.modalContent{background:#2b2b40;padding:2rem 3rem;border-radius:8px;text-align:center}
+.modalBtn{margin:.5rem 1rem;padding:.6rem 1.4rem;border:none;border-radius:6px;
+background:linear-gradient(135deg,#00ffe0,#6f00ff);color:#fff;font-size:1rem;cursor:pointer}
+.modalBtn:hover{transform:scale(1.05)}
+
+/* Mobile */
 @media(max-width:600px){
   .joinContent{flex-direction:column;align-items:center}
   canvas{width:90vw;height:auto}
