@@ -16,11 +16,10 @@
       <div class="rules">
         <h3>How it works</h3>
         <ul>
-          <li>Enter <strong>your name</strong> and a <strong>Room ID</strong>.</li>
-          <li>Share the ID so you both join the same room.</li>
-          <li>When <strong>both players</strong> are present, either one can click <em>Start Game</em>.</li>
+          <li>Enter <strong>name</strong> and a <strong>Room ID</strong>; share it with a friend.</li>
+          <li>Either player can click <em>Start Game</em> once both are present.</li>
           <li>Arrow keys move / rotate, <kbd>Space</kbd> hard-drops.</li>
-          <li>Click <strong>Pause game</strong> to pause for both players, then <strong>End game</strong> to finish.</li>
+          <li><strong>Pause game</strong> → <strong>End game</strong> to finish.</li>
         </ul>
       </div>
 
@@ -44,18 +43,23 @@
   <div id="gameArea">
     <h2 style="text-align:center">Multiplayer Tetris</h2>
 
+    <!-- control buttons (right) -->
     <button id="pauseBtn" class="pauseButton">Pause&nbsp;game</button>
     <button id="endBtn"   class="endButton" style="display:none;">End&nbsp;game</button>
 
-    <div style="max-width:900px;margin:0 auto;">
-      <div style="display:flex;justify-content:center;gap:40px;align-items:flex-start;">
-        <div>
-          <p id="score">Score: 0</p>
-          <canvas id="tetris" width="300" height="600"></canvas>
-          <p id="message"></p>
-        </div>
-        <div id="otherPlayers" style="display:flex;gap:20px;"></div>
+    <!-- Opponent-left notice -->
+    <p id="opponentLeftMsg" class="notice" style="display:none;">
+      Your opponent left. Restarting will start a solo game.
+    </p>
+
+    <!-- Boards -->
+    <div class="boardWrap">
+      <div>
+        <p id="score">Score: 0</p>
+        <canvas id="tetris" width="300" height="600"></canvas>
+        <p id="message"></p>
       </div>
+      <div id="otherPlayers"></div>
     </div>
   </div>
 
