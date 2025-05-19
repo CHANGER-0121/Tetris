@@ -1,61 +1,65 @@
 /*************************************************************************
- *  client.js  —  Multiplayer Tetris front-end  (Pause button right-side)
+ * client.js  — Pause / Resume / End-game logic
  *************************************************************************/
-
 const socket = io("https://tetris-l8kg.onrender.com");
 
-let currentRoomId  = null;
-let hasGameStarted = false;
-let gamePaused     = false;
+let currentRoomId=null, hasGameStarted=false, gamePaused=false;
 
-/* ─── DOM ─── */
+/* DOM */
 const joinBtn  = document.getElementById("joinBtn");
 const startBtn = document.getElementById("startBtn");
 const pauseBtn = document.getElementById("pauseBtn");
+const endBtn   = document.getElementById("endBtn");
+const roomIdInput = document.getElementById("roomId");
+const nameInput   = document.getElementById("playerName");
 
-const roomIdInput     = document.getElementById("roomId");
-const playerNameInput = document.getElementById("playerName");
-
-/* ─── JOIN ─── */
-joinBtn.addEventListener("click", ()=>{
-  const roomId  = roomIdInput.value.trim();
-  const name    = playerNameInput.value.trim();
-  if(!roomId||!name){alert("Enter Name and Room ID");return;}
-
-  socket.emit("joinRoom",{roomId,playerName:name});
-  currentRoomId = roomId;
-
+/* —— JOIN —— */
+joinBtn.addEventListener("click",()=>{
+  const room=roomIdInput.value.trim(), name=nameInput.value.trim();
+  if(!room||!name){alert("Enter name & room");return;}
+  socket.emit("joinRoom",{roomId:room,playerName:name});
+  currentRoomId=room;
   document.getElementById("joinDiv").classList.remove("active");
   document.getElementById("lobbyDiv").classList.add("active");
-  document.getElementById("roomLabel").textContent=`Room: ${roomId}`;
+  document.getElementById("roomLabel").textContent=`Room: ${room}`;
 });
 
-/* ─── START ─── */
-startBtn.addEventListener("click", ()=> currentRoomId && socket.emit("startGame", currentRoomId));
+/* —— START —— */
+startBtn.addEventListener("click",()=> currentRoomId && socket.emit("startGame",currentRoomId));
 
-/* ─── PAUSE / RESUME ─── */
-pauseBtn.addEventListener("click", ()=>{
+/* —— PAUSE / RESUME —— */
+pauseBtn.addEventListener("click",()=>{
   if(!currentRoomId||!hasGameStarted)return;
-  socket.emit(gamePaused? "resumeGame":"pauseGame", currentRoomId);
+  socket.emit(gamePaused?"resumeGame":"pauseGame",currentRoomId);
 });
-socket.on("pauseGame",  ()=>togglePause(true));
-socket.on("resumeGame", ()=>togglePause(false));
+socket.on("pauseGame", ()=>setPaused(true));
+socket.on("resumeGame",()=>setPaused(false));
 
-function togglePause(paused){
-  gamePaused = paused;
-  pauseBtn.textContent = paused ? "Resume game" : "Pause game";
-  document.getElementById("message").textContent = paused? "Game Paused":"";
+function setPaused(p){
+  gamePaused=p;
+  pauseBtn.textContent= p?"Resume game":"Pause game";
+  endBtn.style.display= p?"inline-block":"none";
+  document.getElementById("message").textContent= p?"Game Paused":"";
 }
 
-/* ─── ROOM DATA ─── */
-socket.on("roomData",(players)=>{
-  renderOtherPlayers(players);
-  const ready = Object.keys(players).length===2;
-  startBtn.disabled  = !ready;
-  startBtn.textContent= ready? "Start Game":"Waiting for Player…";
+/* —— END GAME —— */
+endBtn.addEventListener("click",()=> currentRoomId && socket.emit("endGame",currentRoomId));
+socket.on("endGame",()=>{
+  isGameOver=true; gamePaused=false;
+  pauseBtn.style.display="none";
+  endBtn.style.display="none";
+  document.getElementById("message").textContent="Game Ended";
 });
 
-/* ─── GAME START ─── */
+/* —— ROOM DATA —— */
+socket.on("roomData",(players)=>{
+  renderOtherPlayers(players);
+  const ready=Object.keys(players).length===2;
+  startBtn.disabled=!ready;
+  startBtn.textContent=ready?"Start Game":"Waiting…";
+});
+
+/* —— GAME STARTED —— */
 socket.on("gameStarted",()=>{
   hasGameStarted=true;
   document.getElementById("lobbyDiv").classList.remove("active");
@@ -63,19 +67,20 @@ socket.on("gameStarted",()=>{
   initGame();
 });
 
-/* ─── SEND STATE ─── */
+/* —— SEND STATE —— */
 function sendStateToServer(){
   if(currentRoomId&&!isGameOver&&hasGameStarted&&!gamePaused){
-    socket.emit("stateUpdate",{roomId:currentRoomId,state:{score,grid,currentPiece,currentRow,currentCol}});
+    socket.emit("stateUpdate",{roomId:currentRoomId,
+      state:{score,grid,currentPiece,currentRow,currentCol}});
   }
 }
 
-/* ─── RENDER OPPONENTS ─── */
+/* —— RENDER OPPONENTS —— */
 function renderOtherPlayers(players){
   const container=document.getElementById("otherPlayers");
   container.innerHTML="";
   Object.entries(players).forEach(([id,p])=>{
-    if(id===socket.id)return;
+    if(id===socket.id) return;
     const wrap=document.createElement("div");
     wrap.className="playerPanel";
     wrap.innerHTML=`<p><strong>${p.name||id.slice(0,5)}</strong></p>
@@ -85,16 +90,16 @@ function renderOtherPlayers(players){
   });
 }
 
-/* drawOpponentBoard unchanged (same as previous versions) */
+/* —— Draw opponent board —— */
 function drawOpponentBoard(id,p){
   const canvas=document.getElementById(`opponent-${id}`);
-  if(!canvas)return;
+  if(!canvas) return;
   const ctx=canvas.getContext("2d"), size=30, rows=p.grid.length, cols=p.grid[0].length;
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
     const cell=p.grid[r][c];
-    if(cell){ctx.fillStyle=cell;ctx.fillRect(c*size,r*size,size,size);ctx.strokeStyle="#000";
-             ctx.strokeRect(c*size,r*size,size,size);}
+    if(cell){ctx.fillStyle=cell;ctx.fillRect(c*size,r*size,size,size);
+             ctx.strokeStyle="#000";ctx.strokeRect(c*size,r*size,size,size);}
   }
   if(p.currentPiece){
     ctx.fillStyle=p.currentPiece.color;
@@ -109,5 +114,6 @@ function drawOpponentBoard(id,p){
   }
 }
 
-/* ─── INITIAL SCREEN ─── */
-window.addEventListener("DOMContentLoaded",()=> document.getElementById("joinDiv").classList.add("active"));
+/* initial screen */
+window.addEventListener("DOMContentLoaded",()=>
+  document.getElementById("joinDiv").classList.add("active"));
