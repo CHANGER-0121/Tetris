@@ -151,6 +151,42 @@ document.addEventListener("DOMContentLoaded", () => {
       if (p.grid) drawOpponentBoard(id, p);
     });
   }
+/* ─── drawOpponentBoard  (add to client.js) ─── */
+function drawOpponentBoard(id, p) {
+  const canvas = document.getElementById(`opponent-${id}`);
+  if (!canvas) return;
 
-  /* drawOpponentBoard remains unchanged (from game.js) */
+  const ctx      = canvas.getContext("2d");
+  const size     = 30;
+  const rows     = p.grid?.length || 0;
+  const cols     = rows ? p.grid[0].length : 0;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  /* fixed blocks */
+  if (p.grid) {
+    for (let r = 0; r < rows; ++r)
+      for (let c = 0; c < cols; ++c)
+        if (p.grid[r][c]) {
+          ctx.fillStyle = p.grid[r][c];
+          ctx.fillRect(c * size, r * size, size, size);
+          ctx.strokeStyle = "#000";
+          ctx.strokeRect(c * size, r * size, size, size);
+        }
+  }
+
+  /* falling piece */
+  if (p.currentPiece) {
+    ctx.fillStyle = p.currentPiece.color || "#888";
+    p.currentPiece.coords.forEach(([x, y]) => {
+      const rr = p.currentRow + y,
+            cc = p.currentCol + x;
+      if (rr >= 0 && rr < rows && cc >= 0 && cc < cols) {
+        ctx.fillRect(cc * size, rr * size, size, size);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(cc * size, rr * size, size, size);
+      }
+    });
+  }
+}
 });
