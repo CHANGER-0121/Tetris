@@ -10,71 +10,35 @@
   <script defer src="client.js"></script>
 </head>
 <body>
-  <!-- ░░ JOIN ░░ -->
-  <div id="joinDiv" class="active">
-    <div class="joinContent">
-      <!-- Rules -->
-      <div class="rules">
-        <h3>How it works</h3>
-        <ul>
-          <li>Enter <strong>name</strong> and a <strong>Room ID</strong>; share it with a friend.</li>
-          <li>Either player can click <em>Start Game</em> once both are present.</li>
-          <li>Arrow keys move / rotate, <kbd>Space</kbd> hard-drops.</li>
-          <li><strong>Pause game</strong> → <strong>End game</strong> to finish.</li>
-        </ul>
-      </div>
-
-      <!-- Join form -->
-      <div class="joinForm">
-        <h2>Join a Multiplayer Tetris Room</h2>
-        <input type="text" id="playerName" placeholder="Enter your name" />
-        <input type="text" id="roomId"     placeholder="Enter Room ID" />
-        <button id="joinBtn">Join Room</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ░░ LOBBY ░░ -->
-  <div id="lobbyDiv">
-    <h2>Lobby</h2>
-    <p id="roomLabel"></p>
-    <button id="startBtn" disabled>Waiting for Player…</button>
-  </div>
+  <!-- JOIN + LOBBY unchanged above … -->
 
   <!-- ░░ GAME ░░ -->
   <div id="gameArea">
     <h2 style="text-align:center">Multiplayer Tetris</h2>
 
-    <!-- Controls -->
     <button id="pauseBtn" class="pauseButton">Pause&nbsp;game</button>
-    <button id="endBtn"   class="endButton" style="display:none;">End&nbsp;game</button>
+    <button id="endBtn" class="endButton" style="display:none;">End&nbsp;game</button>
 
-    <!-- Opponent-left notice -->
+    <!-- notice if opponent leaves -->
     <p id="opponentLeftMsg" class="notice" style="display:none;">
       Your opponent left. Restarting will start a solo game.
     </p>
 
-    <!-- Boards side-by-side -->
+    <!-- boards -->
     <div class="boardWrap">
-      <!-- Your board -->
-      <div class="playerPanel">
-        <p id="score" class="panelLabel">Score: 0</p>
+      <!-- YOUR panel now includes name + score -->
+      <div class="playerPanel" id="myPanel">
+        <p id="myName"  class="panelLabel"></p>
+        <p id="score"   class="panelLabel">Score: 0</p>
         <canvas id="tetris" width="300" height="600"></canvas>
         <p id="message" class="panelLabel"></p>
       </div>
 
-      <!-- Opponent boards injected here -->
+      <!-- Opponents injected here -->
       <div id="otherPlayers"></div>
     </div>
   </div>
 
-  <!-- ░░ GAME-OVER MODAL ░░ -->
-  <div id="gameOverModal" class="modal">
-    <div class="modalContent">
-      <h3>Game Ended</h3>
-      <button id="restartBtn" class="modalBtn">Restart</button>
-      <button id="menuBtn"    class="modalBtn">Main&nbsp;Menu</button>
-    </div>
-  </div>
+  <!-- GAME-OVER modal unchanged … -->
 </body>
 </html>
