@@ -13,6 +13,7 @@
   <!-- ░░ JOIN ░░ -->
   <div id="joinDiv" class="active">
     <div class="joinContent">
+      <!-- Rules -->
       <div class="rules">
         <h3>How it works</h3>
         <ul>
@@ -23,6 +24,7 @@
         </ul>
       </div>
 
+      <!-- Join form -->
       <div class="joinForm">
         <h2>Join a Multiplayer Tetris Room</h2>
         <input type="text" id="playerName" placeholder="Enter your name" />
@@ -43,7 +45,7 @@
   <div id="gameArea">
     <h2 style="text-align:center">Multiplayer Tetris</h2>
 
-    <!-- control buttons (right) -->
+    <!-- Controls -->
     <button id="pauseBtn" class="pauseButton">Pause&nbsp;game</button>
     <button id="endBtn"   class="endButton" style="display:none;">End&nbsp;game</button>
 
@@ -52,18 +54,21 @@
       Your opponent left. Restarting will start a solo game.
     </p>
 
-    <!-- Boards -->
+    <!-- Boards side-by-side -->
     <div class="boardWrap">
-      <div>
-        <p id="score">Score: 0</p>
+      <!-- Your board -->
+      <div class="playerPanel">
+        <p id="score" class="panelLabel">Score: 0</p>
         <canvas id="tetris" width="300" height="600"></canvas>
-        <p id="message"></p>
+        <p id="message" class="panelLabel"></p>
       </div>
+
+      <!-- Opponent boards injected here -->
       <div id="otherPlayers"></div>
     </div>
   </div>
 
-  <!-- ░░ GAME OVER MODAL ░░ -->
+  <!-- ░░ GAME-OVER MODAL ░░ -->
   <div id="gameOverModal" class="modal">
     <div class="modalContent">
       <h3>Game Ended</h3>
