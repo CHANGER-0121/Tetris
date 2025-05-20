@@ -106,19 +106,20 @@ function draw(){
 
 /* ──────────── GAME LOOP ──────────── */
 function update(){
-  if (isGameOver || gamePaused) return;
+  if (isGameOver || (typeof gamePaused!=="undefined" && gamePaused)) return;
   if (isValidPosition(currentPiece,currentRow+1,currentCol)){
     currentRow++;
   }else{
     lockPiece(); clearLines(); spawnNewPiece();
   }
-  draw(); sendStateToServer();
+  draw();
+  if (typeof sendStateToServer==="function") sendStateToServer();
 }
 
 /* ──────────── KEY HANDLER ──────────── */
 function handleKey(e){
-  if (isGameOver || gamePaused || typeof hasGameStarted==='undefined'||!hasGameStarted)
-    return;
+  if (isGameOver || (typeof gamePaused!=="undefined" && gamePaused)
+      || typeof hasGameStarted==='undefined' || !hasGameStarted) return;
 
   switch(e.key){
     case "ArrowLeft":
@@ -129,7 +130,7 @@ function handleKey(e){
       if (isValidPosition(currentPiece,currentRow+1,currentCol)) currentRow++;
       else { lockPiece(); clearLines(); spawnNewPiece(); }
       break;
-    case "ArrowUp": {   // rotate
+    case "ArrowUp": {
       const rot = currentPiece.coords.map(([x,y])=>[-y,x]);
       const backup = currentPiece.coords;
       currentPiece.coords = rot;
@@ -142,5 +143,17 @@ function handleKey(e){
       lockPiece(); clearLines(); spawnNewPiece();
       break;
   }
-  draw(); sendStateToServer();
+  draw(); if (typeof sendStateToServer==="function") sendStateToServer();
+}
+
+/* ──────────── SEND STATE TO SERVER ──────────── */
+function sendStateToServer(){
+  if (typeof socket==='undefined') return;
+  if (!currentRoomId || typeof isGameOver==='undefined') return;
+  if (isGameOver || (typeof gamePaused!=="undefined" && gamePaused)) return;
+
+  socket.emit("stateUpdate",{
+    roomId: currentRoomId,
+    state : { score, grid, currentPiece, currentRow, currentCol }
+  });
 }
