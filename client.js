@@ -1,6 +1,6 @@
 /****************************************************************
  * client.js  — Pause / Resume / End / Restart + opponent-left
- * Wrapped in DOMContentLoaded to avoid null element errors.
+ * Entire file wrapped in DOMContentLoaded.
  ****************************************************************/
 document.addEventListener("DOMContentLoaded", () => {
   const socket = io();
@@ -10,18 +10,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let gamePaused = false;
   let opponentLeft = false;
 
-  /* DOM refs (grabbed after DOM is loaded) */
-  const joinBtn = document.getElementById("joinBtn");
-  const startBtn = document.getElementById("startBtn");
-  const pauseBtn = document.getElementById("pauseBtn");
-  const endBtn = document.getElementById("endBtn");
-  const modal = document.getElementById("gameOverModal");
-  const restartBtn = document.getElementById("restartBtn");
-  const menuBtn = document.getElementById("menuBtn");
-  const notice = document.getElementById("opponentLeftMsg");
-  const roomIdInput = document.getElementById("roomId");
-  const nameInput = document.getElementById("playerName");
-  const myNameLabel = document.getElementById("myName");
+  /* DOM refs */
+  const joinBtn      = document.getElementById("joinBtn");
+  const startBtn     = document.getElementById("startBtn");
+  const pauseBtn     = document.getElementById("pauseBtn");
+  const endBtn       = document.getElementById("endBtn");
+  const modal        = document.getElementById("gameOverModal");
+  const restartBtn   = document.getElementById("restartBtn");
+  const menuBtn      = document.getElementById("menuBtn");
+  const notice       = document.getElementById("opponentLeftMsg");
+  const roomIdInput  = document.getElementById("roomId");
+  const nameInput    = document.getElementById("playerName");
+  const myNameLabel  = document.getElementById("myName");
 
   /* ─── JOIN ─── */
   joinBtn.onclick = () => {
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     socket.emit("joinRoom", { roomId: room, playerName: name });
     currentRoomId = room;
-    myNameLabel.textContent = name; // show own name
+    myNameLabel.textContent = name;
 
     document.getElementById("joinDiv").classList.remove("active");
     document.getElementById("lobbyDiv").classList.add("active");
@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   }
+  window.sendStateToServer = sendStateToServer;   // ★ expose globally
 
   /* ─── RENDER OTHER PLAYERS ─── */
   function renderOtherPlayers(players) {
@@ -151,42 +152,44 @@ document.addEventListener("DOMContentLoaded", () => {
       if (p.grid) drawOpponentBoard(id, p);
     });
   }
-/* ─── drawOpponentBoard  (add to client.js) ─── */
-function drawOpponentBoard(id, p) {
-  const canvas = document.getElementById(`opponent-${id}`);
-  if (!canvas) return;
+  window.renderOtherPlayers = renderOtherPlayers; // ★ expose globally
 
-  const ctx      = canvas.getContext("2d");
-  const size     = 30;
-  const rows     = p.grid?.length || 0;
-  const cols     = rows ? p.grid[0].length : 0;
+  /* ─── DRAW OPPONENT BOARD ─── */
+  function drawOpponentBoard(id, p) {
+    const canvas = document.getElementById(`opponent-${id}`);
+    if (!canvas) return;
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const ctx  = canvas.getContext("2d");
+    const size = 30;
+    const rows = p.grid?.length || 0;
+    const cols = rows ? p.grid[0].length : 0;
 
-  /* fixed blocks */
-  if (p.grid) {
-    for (let r = 0; r < rows; ++r)
-      for (let c = 0; c < cols; ++c)
-        if (p.grid[r][c]) {
-          ctx.fillStyle = p.grid[r][c];
-          ctx.fillRect(c * size, r * size, size, size);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    /* fixed blocks */
+    if (p.grid) {
+      for (let r = 0; r < rows; ++r)
+        for (let c = 0; c < cols; ++c)
+          if (p.grid[r][c]) {
+            ctx.fillStyle = p.grid[r][c];
+            ctx.fillRect(c * size, r * size, size, size);
+            ctx.strokeStyle = "#000";
+            ctx.strokeRect(c * size, r * size, size, size);
+          }
+    }
+
+    /* falling piece */
+    if (p.currentPiece) {
+      ctx.fillStyle = p.currentPiece.color || "#888";
+      p.currentPiece.coords.forEach(([x, y]) => {
+        const rr = p.currentRow + y,
+              cc = p.currentCol + x;
+        if (rr >= 0 && rr < rows && cc >= 0 && cc < cols) {
+          ctx.fillRect(cc * size, rr * size, size, size);
           ctx.strokeStyle = "#000";
-          ctx.strokeRect(c * size, r * size, size, size);
+          ctx.strokeRect(cc * size, rr * size, size, size);
         }
+      });
+    }
   }
-
-  /* falling piece */
-  if (p.currentPiece) {
-    ctx.fillStyle = p.currentPiece.color || "#888";
-    p.currentPiece.coords.forEach(([x, y]) => {
-      const rr = p.currentRow + y,
-            cc = p.currentCol + x;
-      if (rr >= 0 && rr < rows && cc >= 0 && cc < cols) {
-        ctx.fillRect(cc * size, rr * size, size, size);
-        ctx.strokeStyle = "#000";
-        ctx.strokeRect(cc * size, rr * size, size, size);
-      }
-    });
-  }
-}
 });
