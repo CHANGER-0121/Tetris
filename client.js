@@ -1,29 +1,21 @@
 /****************************************************************
  * client.js  — Multiplayer Tetris front-end
- * Features:
- *  • Join / lobby / start
- *  • Pause / Resume shared between both players
- *  • End game + Restart + Main-menu
- *  • Opponent-left notice
- *  • Sends state updates; draws opponent board
- *
- *  Everything is wrapped in DOMContentLoaded so DOM refs are never null.
- *  Key globals exposed:
- *      window.sendStateToServer
- *      window.renderOtherPlayers
- *      window.gamePaused
+ * Changelog 21-May-2025:
+ *   • Exposed window.hasGameStarted so game.js can read it
  ****************************************************************/
 
 document.addEventListener("DOMContentLoaded", () => {
   const socket = io();
 
   /* ─── Global flags ─── */
-  let currentRoomId = null;
-  let hasGameStarted = false;
-  let gamePaused = false;         // also mirrored to window.gamePaused
-  let opponentLeft = false;
+  let currentRoomId   = null;
+  let hasGameStarted  = false;
+  window.hasGameStarted = false;        // ★ exposed
+  let gamePaused      = false;
+  window.gamePaused   = false;          // already needed by game.js
+  let opponentLeft    = false;
 
-  /* ─── DOM refs ─── */
+  /* ─── DOM references ─── */
   const joinBtn      = document.getElementById("joinBtn");
   const startBtn     = document.getElementById("startBtn");
   const pauseBtn     = document.getElementById("pauseBtn");
@@ -36,9 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const nameInput    = document.getElementById("playerName");
   const myNameLabel  = document.getElementById("myName");
 
-  /* ──────────────────────────────────────────────────────────── */
-  /* JOIN ROOM                                                  */
-  /* ──────────────────────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────── */
+  /* JOIN ROOM                                       */
+  /* ─────────────────────────────────────────────── */
   joinBtn.onclick = () => {
     const room = roomIdInput.value.trim();
     const name = nameInput.value.trim();
@@ -57,9 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
   startBtn.onclick = () =>
     currentRoomId && socket.emit("startGame", currentRoomId);
 
-  /* ──────────────────────────────────────────────────────────── */
-  /* PAUSE / RESUME                                             */
-  /* ──────────────────────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────── */
+  /* PAUSE / RESUME                                  */
+  /* ─────────────────────────────────────────────── */
   pauseBtn.onclick = () => {
     if (!currentRoomId || !hasGameStarted) return;
     socket.emit(gamePaused ? "resumeGame" : "pauseGame", currentRoomId);
@@ -70,21 +62,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setPaused(paused) {
     gamePaused = paused;
-    window.gamePaused = paused;                 // ← expose to game.js
+    window.gamePaused = paused;          // keep global
     pauseBtn.textContent = paused ? "Resume game" : "Pause game";
     endBtn.style.display = paused ? "inline-block" : "none";
     document.getElementById("message").textContent =
       paused ? "Game Paused" : "";
   }
 
-  /* ──────────────────────────────────────────────────────────── */
-  /* END GAME                                                   */
-  /* ──────────────────────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────── */
+  /* END GAME                                        */
+  /* ─────────────────────────────────────────────── */
   endBtn.onclick = () =>
     currentRoomId && socket.emit("endGame", currentRoomId);
 
   socket.on("endGame", () => {
-    isGameOver = true;
+    isGameOver            = true;
+    hasGameStarted        = false;
+    window.hasGameStarted = false;      // ★ reset global
     setPaused(false);
     pauseBtn.style.display = "none";
     endBtn.style.display   = "none";
@@ -97,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.on("gameRestart", () => {
     modal.classList.remove("active");
-    notice.style.display = opponentLeft ? "block" : "none";
+    notice.classList.toggle("show", opponentLeft);
     resetLocalState();
     initGame();
   });
@@ -108,12 +102,12 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ─── OPPONENT LEFT ─── */
   socket.on("opponentLeft", () => {
     opponentLeft = true;
-    notice.style.display = "block";
+    notice.classList.add("show");
   });
 
-  /* ──────────────────────────────────────────────────────────── */
-  /* ROOM DATA (state updates from server)                       */
-  /* ──────────────────────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────── */
+  /* ROOM DATA (state updates)                       */
+  /* ─────────────────────────────────────────────── */
   socket.on("roomData", (players) => {
     renderOtherPlayers(players);
     const ready = Object.keys(players).length === 2;
@@ -123,24 +117,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ─── GAME STARTED ─── */
   socket.on("gameStarted", () => {
-    hasGameStarted = true;
+    hasGameStarted        = true;
+    window.hasGameStarted = true;       // ★ expose
     document.getElementById("lobbyDiv").classList.remove("active");
     document.getElementById("gameArea").classList.add("active");
     initGame();
   });
 
-  /* ──────────────────────────────────────────────────────────── */
-  /* UTILITIES                                                  */
-  /* ──────────────────────────────────────────────────────────── */
+  /* ================================================= */
+  /* LOCAL UTILITIES & HELPERS  (unchanged)            */
+  /* ================================================= */
+
   function resetLocalState() {
-    grid = createGrid();        // globals from game.js
+    grid = createGrid();
     score = 0;
     isGameOver = false;
     document.getElementById("score").textContent = "Score: 0";
     document.getElementById("message").textContent = "";
   }
 
-  /* ───────── sendStateToServer (called by game.js) ────────── */
   function sendStateToServer() {
     if (
       currentRoomId && hasGameStarted && !isGameOver &&
@@ -152,43 +147,33 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   }
-  window.sendStateToServer = sendStateToServer;   // ← expose globally
+  window.sendStateToServer = sendStateToServer;
 
-  /* ───────── renderOtherPlayers (draw each opponent) ───────── */
   function renderOtherPlayers(players) {
     const container = document.getElementById("otherPlayers");
     container.innerHTML = "";
-
     Object.entries(players).forEach(([id, p]) => {
-      if (id === socket.id) return;   // skip self
-
+      if (id === socket.id) return;
       const div = document.createElement("div");
       div.className = "playerPanel";
       div.innerHTML = `
         <p><strong>${p.name || id.slice(0,5)}</strong></p>
         <p class="panelLabel">Score: ${p.score || 0}</p>
-        <canvas id="opponent-${id}" width="300" height="600"></canvas>
-      `;
+        <canvas id="opponent-${id}" width="300" height="600"></canvas>`;
       container.appendChild(div);
-
       if (p.grid) drawOpponentBoard(id, p);
     });
   }
-  window.renderOtherPlayers = renderOtherPlayers; // ← expose globally
+  window.renderOtherPlayers = renderOtherPlayers;
 
-  /* ───────── drawOpponentBoard (helper) ───────── */
   function drawOpponentBoard(id, p) {
     const canvas = document.getElementById(`opponent-${id}`);
     if (!canvas) return;
-
     const ctx  = canvas.getContext("2d");
     const size = 30;
     const rows = p.grid?.length || 0;
     const cols = rows ? p.grid[0].length : 0;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    /* fixed blocks */
     if (p.grid) {
       for (let r = 0; r < rows; ++r)
         for (let c = 0; c < cols; ++c)
@@ -199,13 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.strokeRect(c * size, r * size, size, size);
           }
     }
-
-    /* falling piece */
     if (p.currentPiece) {
       ctx.fillStyle = p.currentPiece.color || "#888";
       p.currentPiece.coords.forEach(([x, y]) => {
-        const rr = p.currentRow + y,
-              cc = p.currentCol + x;
+        const rr = p.currentRow + y, cc = p.currentCol + x;
         if (rr >= 0 && rr < rows && cc >= 0 && cc < cols) {
           ctx.fillRect(cc * size, rr * size, size, size);
           ctx.strokeStyle = "#000";
